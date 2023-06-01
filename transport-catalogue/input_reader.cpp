@@ -2,10 +2,8 @@
 #include <utility>
 #include <iostream>
 
-using namespace std;
 
 using namespace ctlg;
-
 
 // returning string, end of the string
 std::string detail::SplitIntoWord::Split(char sym, int offset) {
@@ -39,14 +37,14 @@ std::string detail::SplitIntoWord::Split(char sym, std::string buffer, int offse
     return str.substr(begin, end - begin );
 }
 
-void detail::AddNewNode(const string& str, ctlg::TransportCatalogue& catalogue) {
+void detail::AddNewNode(const std::string& str, ctlg::TransportCatalogue& catalogue) {
 
     SplitIntoWord temp(str);
-    string command(temp.Split(' '));
+    std::string command(temp.Split(' '));
     
     if(command == "Stop"){
         
-        string name(temp.Split(':'));
+        std::string name(temp.Split(':'));
         double first = stod(temp.Split(','));
         double second = stod(temp.Split(','));
 
@@ -54,17 +52,16 @@ void detail::AddNewNode(const string& str, ctlg::TransportCatalogue& catalogue) 
         catalogue.AddBusStop(ctlg::BusStop(temp_cord, name));
 
         while(!temp.IsEnd()){
-
             int length = stoi(temp.Split('m'));
             temp.Split(' ');
-            string new_name = temp.Split(',', " ");
+            std::string new_name = temp.Split(',', " ");
             catalogue.SetDistanceBetweenStops(name, new_name, length);
         }
     }
 
     if(command == "Bus"){
-        string name = temp.Split(':');
-        std::deque<string> buses;
+        std::string name = temp.Split(':');
+        std::vector<std::string> buses;
         
         char typeSym = '>';
         ctlg::BusRoute::Type type = ctlg::BusRoute::Type::CYCLIC;
@@ -85,12 +82,12 @@ void detail::AddNewNode(const string& str, ctlg::TransportCatalogue& catalogue) 
 
 void detail::AddNewNode(std::istream &in, ctlg::TransportCatalogue &catalogue)
 {
-    string line;
-    getline(in, line);
+    std::string line;
+    std::getline(in, line);
     int num = stoi(line);
 
     for(int i = 0; i < num; i++){
-        getline(cin, line);
+        std::getline(std::cin, line);
         detail::AddNewNode(line, catalogue);  
     }
 

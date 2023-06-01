@@ -30,7 +30,7 @@ class SplitIntoWord{
         int end = 0;
         const std::string& str;
         std::string notof = " ";
-    };
+};
 
 
     void AddNewNode(const std::string& str, ctlg::TransportCatalogue& catalogue) ;

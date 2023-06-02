@@ -1,6 +1,32 @@
-Bus 256: 6 stops on route, 5 unique stops, 5950 route length, 1.36124 curvature
-Bus 750: 7 stops on route, 3 unique stops, 27400 route length, 1.30853 curvature
+INFO: 3900 Tolstopaltsevo Marushkino
+INFO: 9900 Marushkino Rasskazovka
+INFO: 100 Marushkino Marushkino
+BUS: Biryulyovo Zapadnoye
+BUS: Biryusinka
+BUS: Universam
+BUS: Biryulyovo Tovarnaya
+BUS: Biryulyovo Passazhirskaya
+BUS: Biryulyovo Passazhirskaya
+BUS: Biryulyovo Passazhirskaya
+BUS: Biryulyovo Passazhirskaya
+BUS: Biryulyovo Passazhirskaya
+BUS: Biryulyovo Passazhirskaya
+INFO: 9500 Rasskazovka Marushkino
+INFO: 7500 Biryulyovo Zapadnoye Rossoshanskaya ulitsa
+INFO: 1800 Biryulyovo Zapadnoye Biryusinka
+INFO: 2400 Biryulyovo Zapadnoye Universam
+INFO: 750 Biryusinka Universam
+INFO: 5600 Universam Rossoshanskaya ulitsa
+INFO: 900 Universam Biryulyovo Tovarnaya
+INFO: 1300 Biryulyovo Tovarnaya Biryulyovo Passazhirskaya
+INFO: 1200 Biryulyovo Passazhirskaya Biryulyovo Zapadnoye
+BUS: Rossoshanskaya ulitsa
+BUS: Rossoshanskaya ulitsa
+BUS: Rossoshanskaya ulitsa
+BUS: Rossoshanskaya ulitsa
+Bus 256: 6 stops on route, 5 unique stops, 14250 route length, 4.07451 curvature
+Bus 750: 7 stops on route, 1 unique stops, 57000 route length, inf curvature
 Bus 751: not found
 Stop Samara: not found
 Stop Prazhskaya: no buses
-Stop Biryulyovo Zapadnoye: buses 256 828
+Stop Biryulyovo Zapadnoye: buses 256

@@ -80,7 +80,7 @@ public:
 
     BusRoute::Type GetRouteType(std::string_view num) const ;
 
-    std::unordered_set<std::string_view> GetRouteByStop(std::string_view name) const ;
+    std::unordered_set<std::string_view>  GetRouteByStop(std::string_view name) const ;
 
     void SetDistanceBetweenStops(std::string_view stop1, std::string_view stop2, int distance);
 

@@ -65,7 +65,7 @@ void detail::GetRouteInfo(std::ostream &out, std::istream& in, const ctlg::Trans
             set<string_view> buses(route.begin(), route.end());
 
             if(buses.size() == 0){
-                if(ctl.IsBusStop(name) == false){
+                if(ctl.BusStopExist(name) == false){
                     out << " not found";
                 }
                 else{

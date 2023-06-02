@@ -56,17 +56,13 @@ void detail::AddNewNode(const std::string& str, ctlg::TransportCatalogue& catalo
             temp.Split(' ');
             std::string new_name = temp.Split(',', " ");
             catalogue.SetDistanceBetweenStops(name, new_name, length);
-
-            std::cout << "INFO: " << length << " " << name << " " << new_name << std::endl;
         }
     }
 
     if(command == "Bus"){
 
-        // std::cout << "1 OK " << std::endl;
         std::string name = temp.Split(':');
         std::vector<std::string> buses;
-        // std::cout << "2 OK " << std::endl;
         
         char typeSym = '>';
         ctlg::BusRoute::Type type = ctlg::BusRoute::Type::CYCLIC;
@@ -76,17 +72,13 @@ void detail::AddNewNode(const std::string& str, ctlg::TransportCatalogue& catalo
             type = ctlg::BusRoute::Type::STRAIGHT;
         }
 
-        // std::cout << "3 OK " << std::endl;
-
         while(!temp.IsEnd()){
             buses.push_back(temp.Split(typeSym, -1));
         }
 
-        // std::cout << "4 OK " << std::endl;
 
         catalogue.AddBusRoute(std::move(buses), name, type);
 
-        // std::cout << "5 OK " << std::endl;
     }
     
 }

@@ -31,33 +31,23 @@ void TransportCatalogue::AddBusRoute(const std::vector<std::string>& route, stri
     res.name = std::move(num);
     res.type = type;
 
-    // std::cout << "ROUTE 1"  << std::endl;
+
 
     if(name_busRoute_database.count(num) == 0){
         for(const auto& stop : route){
             res.buses.push_back(CreateBusStop(stop));
-            std::cout << "BUS: " << res.buses.back()->name << std::endl;
-        }
 
-        // std::cout << "ROUTE 2"  << std::endl;
+        }
 
         busRoute_database.push_back(std::move(res));
         name_busRoute_database[busRoute_database.back().name] = &busRoute_database.back(); 
 
-        // std::cout << "ROUTE 3"  << std::endl;
 
         for(const BusStop* stop : name_busRoute_database[busRoute_database.back().name]->buses){
-           // std::cout << "ROUTE 5 " <<  std::endl;
+
             busStop_busRoute_dataBase[stop->name].insert(busRoute_database.back().name);
         }
         
-       
-
-        //std::cout << "ROUTE 4"  << std::endl;
-
-        // for(const auto stop : name_busRoute_database.at(busRoute_database.back().name).buses){
-        //     busStop_busRoute_dataBase[stop->name].insert(busRoute_database.back().name);
-        // }
     }
 }
 

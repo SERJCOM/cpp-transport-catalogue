@@ -81,12 +81,12 @@ clean: CMakeFiles/transport.dir/clean
 CMakeFiles/transport.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target transport"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target transport"
 .PHONY : CMakeFiles/transport.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/transport.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/transport.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles 0
 .PHONY : CMakeFiles/transport.dir/rule

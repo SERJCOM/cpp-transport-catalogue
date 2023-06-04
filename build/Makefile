@@ -129,29 +129,77 @@ transport/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/build
 .PHONY : transport/fast
 
-input_reader.o: input_reader.cpp.o
-.PHONY : input_reader.o
+domain.o: domain.cpp.o
+.PHONY : domain.o
 
 # target to build an object file
-input_reader.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/input_reader.cpp.o
-.PHONY : input_reader.cpp.o
+domain.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/domain.cpp.o
+.PHONY : domain.cpp.o
 
-input_reader.i: input_reader.cpp.i
-.PHONY : input_reader.i
+domain.i: domain.cpp.i
+.PHONY : domain.i
 
 # target to preprocess a source file
-input_reader.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/input_reader.cpp.i
-.PHONY : input_reader.cpp.i
+domain.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/domain.cpp.i
+.PHONY : domain.cpp.i
 
-input_reader.s: input_reader.cpp.s
-.PHONY : input_reader.s
+domain.s: domain.cpp.s
+.PHONY : domain.s
 
 # target to generate assembly for a file
-input_reader.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/input_reader.cpp.s
-.PHONY : input_reader.cpp.s
+domain.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/domain.cpp.s
+.PHONY : domain.cpp.s
+
+json.o: json.cpp.o
+.PHONY : json.o
+
+# target to build an object file
+json.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/json.cpp.o
+.PHONY : json.cpp.o
+
+json.i: json.cpp.i
+.PHONY : json.i
+
+# target to preprocess a source file
+json.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/json.cpp.i
+.PHONY : json.cpp.i
+
+json.s: json.cpp.s
+.PHONY : json.s
+
+# target to generate assembly for a file
+json.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/json.cpp.s
+.PHONY : json.cpp.s
+
+json_reader.o: json_reader.cpp.o
+.PHONY : json_reader.o
+
+# target to build an object file
+json_reader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/json_reader.cpp.o
+.PHONY : json_reader.cpp.o
+
+json_reader.i: json_reader.cpp.i
+.PHONY : json_reader.i
+
+# target to preprocess a source file
+json_reader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/json_reader.cpp.i
+.PHONY : json_reader.cpp.i
+
+json_reader.s: json_reader.cpp.s
+.PHONY : json_reader.s
+
+# target to generate assembly for a file
+json_reader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/json_reader.cpp.s
+.PHONY : json_reader.cpp.s
 
 main.o: main.cpp.o
 .PHONY : main.o
@@ -177,29 +225,29 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-stat_reader.o: stat_reader.cpp.o
-.PHONY : stat_reader.o
+request_handler.o: request_handler.cpp.o
+.PHONY : request_handler.o
 
 # target to build an object file
-stat_reader.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/stat_reader.cpp.o
-.PHONY : stat_reader.cpp.o
+request_handler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/request_handler.cpp.o
+.PHONY : request_handler.cpp.o
 
-stat_reader.i: stat_reader.cpp.i
-.PHONY : stat_reader.i
+request_handler.i: request_handler.cpp.i
+.PHONY : request_handler.i
 
 # target to preprocess a source file
-stat_reader.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/stat_reader.cpp.i
-.PHONY : stat_reader.cpp.i
+request_handler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/request_handler.cpp.i
+.PHONY : request_handler.cpp.i
 
-stat_reader.s: stat_reader.cpp.s
-.PHONY : stat_reader.s
+request_handler.s: request_handler.cpp.s
+.PHONY : request_handler.s
 
 # target to generate assembly for a file
-stat_reader.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/stat_reader.cpp.s
-.PHONY : stat_reader.cpp.s
+request_handler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/transport.dir/build.make CMakeFiles/transport.dir/request_handler.cpp.s
+.PHONY : request_handler.cpp.s
 
 transport_catalogue.o: transport_catalogue.cpp.o
 .PHONY : transport_catalogue.o
@@ -234,15 +282,21 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... transport"
-	@echo "... input_reader.o"
-	@echo "... input_reader.i"
-	@echo "... input_reader.s"
+	@echo "... domain.o"
+	@echo "... domain.i"
+	@echo "... domain.s"
+	@echo "... json.o"
+	@echo "... json.i"
+	@echo "... json.s"
+	@echo "... json_reader.o"
+	@echo "... json_reader.i"
+	@echo "... json_reader.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
-	@echo "... stat_reader.o"
-	@echo "... stat_reader.i"
-	@echo "... stat_reader.s"
+	@echo "... request_handler.o"
+	@echo "... request_handler.i"
+	@echo "... request_handler.s"
 	@echo "... transport_catalogue.o"
 	@echo "... transport_catalogue.i"
 	@echo "... transport_catalogue.s"

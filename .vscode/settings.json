@@ -49,7 +49,9 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "map": "cpp",
+        "variant": "cpp"
     },
     "cmake.sourceDirectory": "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue"
 }

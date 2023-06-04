@@ -69,24 +69,10 @@ include CMakeFiles/transport.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/transport.dir/flags.make
 
-CMakeFiles/transport.dir/input_reader.cpp.o: CMakeFiles/transport.dir/flags.make
-CMakeFiles/transport.dir/input_reader.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/input_reader.cpp
-CMakeFiles/transport.dir/input_reader.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/transport.dir/input_reader.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/input_reader.cpp.o -MF CMakeFiles/transport.dir/input_reader.cpp.o.d -o CMakeFiles/transport.dir/input_reader.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/input_reader.cpp
-
-CMakeFiles/transport.dir/input_reader.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/transport.dir/input_reader.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/input_reader.cpp > CMakeFiles/transport.dir/input_reader.cpp.i
-
-CMakeFiles/transport.dir/input_reader.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/input_reader.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/input_reader.cpp -o CMakeFiles/transport.dir/input_reader.cpp.s
-
 CMakeFiles/transport.dir/main.cpp.o: CMakeFiles/transport.dir/flags.make
 CMakeFiles/transport.dir/main.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/main.cpp
 CMakeFiles/transport.dir/main.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/transport.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/transport.dir/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/main.cpp.o -MF CMakeFiles/transport.dir/main.cpp.o.d -o CMakeFiles/transport.dir/main.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/main.cpp
 
 CMakeFiles/transport.dir/main.cpp.i: cmake_force
@@ -97,24 +83,10 @@ CMakeFiles/transport.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/main.cpp -o CMakeFiles/transport.dir/main.cpp.s
 
-CMakeFiles/transport.dir/stat_reader.cpp.o: CMakeFiles/transport.dir/flags.make
-CMakeFiles/transport.dir/stat_reader.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/stat_reader.cpp
-CMakeFiles/transport.dir/stat_reader.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/transport.dir/stat_reader.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/stat_reader.cpp.o -MF CMakeFiles/transport.dir/stat_reader.cpp.o.d -o CMakeFiles/transport.dir/stat_reader.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/stat_reader.cpp
-
-CMakeFiles/transport.dir/stat_reader.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/transport.dir/stat_reader.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/stat_reader.cpp > CMakeFiles/transport.dir/stat_reader.cpp.i
-
-CMakeFiles/transport.dir/stat_reader.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/stat_reader.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/stat_reader.cpp -o CMakeFiles/transport.dir/stat_reader.cpp.s
-
 CMakeFiles/transport.dir/transport_catalogue.cpp.o: CMakeFiles/transport.dir/flags.make
 CMakeFiles/transport.dir/transport_catalogue.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/transport_catalogue.cpp
 CMakeFiles/transport.dir/transport_catalogue.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/transport.dir/transport_catalogue.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/transport.dir/transport_catalogue.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/transport_catalogue.cpp.o -MF CMakeFiles/transport.dir/transport_catalogue.cpp.o.d -o CMakeFiles/transport.dir/transport_catalogue.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/transport_catalogue.cpp
 
 CMakeFiles/transport.dir/transport_catalogue.cpp.i: cmake_force
@@ -125,23 +97,83 @@ CMakeFiles/transport.dir/transport_catalogue.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/transport_catalogue.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/transport_catalogue.cpp -o CMakeFiles/transport.dir/transport_catalogue.cpp.s
 
+CMakeFiles/transport.dir/domain.cpp.o: CMakeFiles/transport.dir/flags.make
+CMakeFiles/transport.dir/domain.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/domain.cpp
+CMakeFiles/transport.dir/domain.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/transport.dir/domain.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/domain.cpp.o -MF CMakeFiles/transport.dir/domain.cpp.o.d -o CMakeFiles/transport.dir/domain.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/domain.cpp
+
+CMakeFiles/transport.dir/domain.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/transport.dir/domain.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/domain.cpp > CMakeFiles/transport.dir/domain.cpp.i
+
+CMakeFiles/transport.dir/domain.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/domain.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/domain.cpp -o CMakeFiles/transport.dir/domain.cpp.s
+
+CMakeFiles/transport.dir/json_reader.cpp.o: CMakeFiles/transport.dir/flags.make
+CMakeFiles/transport.dir/json_reader.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json_reader.cpp
+CMakeFiles/transport.dir/json_reader.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/transport.dir/json_reader.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/json_reader.cpp.o -MF CMakeFiles/transport.dir/json_reader.cpp.o.d -o CMakeFiles/transport.dir/json_reader.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json_reader.cpp
+
+CMakeFiles/transport.dir/json_reader.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/transport.dir/json_reader.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json_reader.cpp > CMakeFiles/transport.dir/json_reader.cpp.i
+
+CMakeFiles/transport.dir/json_reader.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/json_reader.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json_reader.cpp -o CMakeFiles/transport.dir/json_reader.cpp.s
+
+CMakeFiles/transport.dir/request_handler.cpp.o: CMakeFiles/transport.dir/flags.make
+CMakeFiles/transport.dir/request_handler.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/request_handler.cpp
+CMakeFiles/transport.dir/request_handler.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/transport.dir/request_handler.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/request_handler.cpp.o -MF CMakeFiles/transport.dir/request_handler.cpp.o.d -o CMakeFiles/transport.dir/request_handler.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/request_handler.cpp
+
+CMakeFiles/transport.dir/request_handler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/transport.dir/request_handler.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/request_handler.cpp > CMakeFiles/transport.dir/request_handler.cpp.i
+
+CMakeFiles/transport.dir/request_handler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/request_handler.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/request_handler.cpp -o CMakeFiles/transport.dir/request_handler.cpp.s
+
+CMakeFiles/transport.dir/json.cpp.o: CMakeFiles/transport.dir/flags.make
+CMakeFiles/transport.dir/json.cpp.o: /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json.cpp
+CMakeFiles/transport.dir/json.cpp.o: CMakeFiles/transport.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/transport.dir/json.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/transport.dir/json.cpp.o -MF CMakeFiles/transport.dir/json.cpp.o.d -o CMakeFiles/transport.dir/json.cpp.o -c /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json.cpp
+
+CMakeFiles/transport.dir/json.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/transport.dir/json.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json.cpp > CMakeFiles/transport.dir/json.cpp.i
+
+CMakeFiles/transport.dir/json.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/transport.dir/json.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json.cpp -o CMakeFiles/transport.dir/json.cpp.s
+
 # Object files for target transport
 transport_OBJECTS = \
-"CMakeFiles/transport.dir/input_reader.cpp.o" \
 "CMakeFiles/transport.dir/main.cpp.o" \
-"CMakeFiles/transport.dir/stat_reader.cpp.o" \
-"CMakeFiles/transport.dir/transport_catalogue.cpp.o"
+"CMakeFiles/transport.dir/transport_catalogue.cpp.o" \
+"CMakeFiles/transport.dir/domain.cpp.o" \
+"CMakeFiles/transport.dir/json_reader.cpp.o" \
+"CMakeFiles/transport.dir/request_handler.cpp.o" \
+"CMakeFiles/transport.dir/json.cpp.o"
 
 # External object files for target transport
 transport_EXTERNAL_OBJECTS =
 
-transport: CMakeFiles/transport.dir/input_reader.cpp.o
 transport: CMakeFiles/transport.dir/main.cpp.o
-transport: CMakeFiles/transport.dir/stat_reader.cpp.o
 transport: CMakeFiles/transport.dir/transport_catalogue.cpp.o
+transport: CMakeFiles/transport.dir/domain.cpp.o
+transport: CMakeFiles/transport.dir/json_reader.cpp.o
+transport: CMakeFiles/transport.dir/request_handler.cpp.o
+transport: CMakeFiles/transport.dir/json.cpp.o
 transport: CMakeFiles/transport.dir/build.make
 transport: CMakeFiles/transport.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable transport"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/sergei/prog/practicum/cpp-transport-catalogue/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable transport"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/transport.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

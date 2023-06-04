@@ -6,12 +6,12 @@ using namespace std;
 using namespace ctlg;
 
 void TransportCatalogue::AddBusStop(const BusStop& stop){
-    if(name_busStop_database.count(stop.name) == 0){
-        busStop_database.push_back(stop);
-        busStop_busRoute_dataBase.insert({busStop_database.back().name, {}});
-        name_busStop_database[busStop_database.back().name] = &busStop_database.back();
+    if(name_busstop_database.count(stop.name) == 0){
+        busstop_database.push_back(stop);
+        busstop_busroute_database.insert({busstop_database.back().name, {}});
+        name_busstop_database[busstop_database.back().name] = &busstop_database.back();
     }else{
-        auto it = std::find_if(busStop_database.begin(), busStop_database.end(), [&](const BusStop& i){
+        auto it = std::find_if(busstop_database.begin(), busstop_database.end(), [&](const BusStop& i){
             return (i.name == stop.name);
         });
 
@@ -33,19 +33,19 @@ void TransportCatalogue::AddBusRoute(const std::vector<std::string>& route, stri
 
 
 
-    if(name_busRoute_database.count(num) == 0){
+    if(name_busroute_database.count(num) == 0){
         for(const auto& stop : route){
             res.buses.push_back(CreateBusStop(stop));
 
         }
 
-        busRoute_database.push_back(std::move(res));
-        name_busRoute_database[busRoute_database.back().name] = &busRoute_database.back(); 
+        busroute_database.push_back(std::move(res));
+        name_busroute_database[busroute_database.back().name] = &busroute_database.back(); 
 
 
-        for(const BusStop* stop : name_busRoute_database[busRoute_database.back().name]->buses){
+        for(const BusStop* stop : name_busroute_database[busroute_database.back().name]->buses){
 
-            busStop_busRoute_dataBase[stop->name].insert(busRoute_database.back().name);
+            busstop_busroute_database[stop->name].insert(busroute_database.back().name);
         }
         
     }
@@ -53,18 +53,18 @@ void TransportCatalogue::AddBusRoute(const std::vector<std::string>& route, stri
 
 bool TransportCatalogue::BusStopExist(std::string_view stop) const
 {
-    return name_busStop_database.count(stop) == 1;
+    return name_busstop_database.count(stop) == 1;
 }
 
 std::vector<BusStop> TransportCatalogue::GetStops(std::string_view num) const
 {
-    if(name_busRoute_database.count(num) == 0){
+    if(name_busroute_database.count(num) == 0){
         static std::vector<BusStop> temp;
         return temp;
     }
 
     std::vector<BusStop> res;
-    for(const BusStop* i : name_busRoute_database.at(num)->buses){
+    for(const BusStop* i : name_busroute_database.at(num)->buses){
         res.push_back(*i);
     }
 
@@ -74,24 +74,24 @@ std::vector<BusStop> TransportCatalogue::GetStops(std::string_view num) const
 
 const BusStop* TransportCatalogue::GetStop(std::string_view name) const
 {
-    if(name_busStop_database.count(name) == 0){
+    if(name_busstop_database.count(name) == 0){
         return nullptr;
     }
-    return name_busStop_database.at(name);
+    return name_busstop_database.at(name);
 }
 
-BusRoute TransportCatalogue::GetRoute(std::string_view num) const
+const BusRoute* TransportCatalogue::GetRoute(std::string_view num) const
 {
-    if(name_busRoute_database.count(num) == 0){
-        return BusRoute();
+    if(name_busroute_database.count(num) == 0){
+        return nullptr;
     }
 
-    return *name_busRoute_database.at(num);
+    return name_busroute_database.at(num);
 }
 
 size_t TransportCatalogue::GetUniqueStopsForRoute(std::string_view num) const
 {
-    auto route = name_busRoute_database.at(num);
+    auto route = name_busroute_database.at(num);
     auto type = route->type;
 
     size_t uniq = 0;
@@ -123,21 +123,21 @@ size_t TransportCatalogue::GetUniqueStopsForRoute(std::string_view num) const
 
 BusRoute::Type TransportCatalogue::GetRouteType(std::string_view num) const
 {   
-    return name_busRoute_database.at(num)->type;
+    return name_busroute_database.at(num)->type;
 }
 
 std::unordered_set<std::string_view>  TransportCatalogue::GetRouteByStop(std::string_view name) const
 {
     std::unordered_set<std::string_view> res;
     std::string name_(name);
-    if(name_busStop_database.count(name_) == 0){
+    if(name_busstop_database.count(name_) == 0){
         return res;
     }
     
-    const std::string& name_bus = name_busStop_database.at(name_)->name;
+    const std::string& name_bus = name_busstop_database.at(name_)->name;
 
-    for(auto route : busStop_busRoute_dataBase.at(name_bus)){
-        res.insert(name_busRoute_database.at(route)->name);
+    for(auto route : busstop_busroute_database.at(name_bus)){
+        res.insert(name_busroute_database.at(route)->name);
     }
 
     return res;
@@ -169,20 +169,15 @@ int TransportCatalogue::GetDistanceBetweenStops(std::string_view stop1, std::str
 
 const BusStop *TransportCatalogue::CreateBusStop(std::string_view name)
 {
-    if(name_busStop_database.count(name) == 0){
+    if(name_busstop_database.count(name) == 0){
         BusStop stop;
         stop.name = std::string(name);
 
-        busStop_database.push_back(std::move(stop));
-        name_busStop_database[busStop_database.back().name] = &busStop_database.back();
-        busStop_busRoute_dataBase.insert({busStop_database.back().name, {}});
+        busstop_database.push_back(std::move(stop));
+        name_busstop_database[busstop_database.back().name] = &busstop_database.back();
+        busstop_busroute_database.insert({busstop_database.back().name, {}});
     }
-    //return name_busStop_database.at(busStop_database.back().name);
-    return name_busStop_database.at(name);
+    //return name_busstop_database.at(busstop_database.back().name);
+    return name_busstop_database.at(name);
 }
 
-ctlg::BusStop::BusStop(Coordinates cord, std::string_view name)
-{
-    coord = cord;
-    this->name = name;
-}

@@ -8,9 +8,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/input_reader.cpp" "CMakeFiles/transport.dir/input_reader.cpp.o" "gcc" "CMakeFiles/transport.dir/input_reader.cpp.o.d"
+  "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/domain.cpp" "CMakeFiles/transport.dir/domain.cpp.o" "gcc" "CMakeFiles/transport.dir/domain.cpp.o.d"
+  "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json.cpp" "CMakeFiles/transport.dir/json.cpp.o" "gcc" "CMakeFiles/transport.dir/json.cpp.o.d"
+  "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/json_reader.cpp" "CMakeFiles/transport.dir/json_reader.cpp.o" "gcc" "CMakeFiles/transport.dir/json_reader.cpp.o.d"
   "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/main.cpp" "CMakeFiles/transport.dir/main.cpp.o" "gcc" "CMakeFiles/transport.dir/main.cpp.o.d"
-  "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/stat_reader.cpp" "CMakeFiles/transport.dir/stat_reader.cpp.o" "gcc" "CMakeFiles/transport.dir/stat_reader.cpp.o.d"
+  "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/request_handler.cpp" "CMakeFiles/transport.dir/request_handler.cpp.o" "gcc" "CMakeFiles/transport.dir/request_handler.cpp.o.d"
   "/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/transport_catalogue.cpp" "CMakeFiles/transport.dir/transport_catalogue.cpp.o" "gcc" "CMakeFiles/transport.dir/transport_catalogue.cpp.o.d"
   )
 

@@ -1,8 +1,10 @@
 project(transport)
 
 add_executable(transport
- input_reader.cpp 
  main.cpp 
- stat_reader.cpp 
  transport_catalogue.cpp
+ domain.cpp 
+ json_reader.cpp 
+ request_handler.cpp 
+ json.cpp
  )

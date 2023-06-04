@@ -7,58 +7,9 @@
 #include <vector>
 #include <string_view>
 #include <deque>
+#include "domain.h" 
 
 namespace ctlg{
-
-struct BusStop{
-    BusStop() = default;
-    BusStop(Coordinates cord, std::string_view name);
-
-    Coordinates coord;
-    std::string name;
-};
-
-struct BusRoute{
-    enum class Type{
-        STRAIGHT,
-        CYCLIC
-    };
-
-    std::vector<const BusStop*> buses; // это должно быть константным 
-    std::string name;
-    Type type;
-};
-
-namespace Hash{
-
-    struct BusStop{
-        size_t operator()(const ctlg::BusStop& stop) const{
-            size_t hash = 0;
-            hash += std::hash<double>{}(stop.coord.lat) * 37 ^ 3;
-            hash += std::hash<double>{}(stop.coord.lng) * 37 ^ 2;
-            hash += std::hash<std::string>{}(stop.name) * 37 ;
-            return hash;
-        }
-    };
-
-    struct BusRoute{
-        size_t operator()(const ctlg::BusRoute& stop) const{
-            return std::hash<std::string>{}(stop.name) * 37 ^ 2;
-        }
-    };
-
-    //TODO
-    // проверить эффективность хеша на имени и попробовать сравнить с хешем на координатах
-    struct BusA_BusB{
-        size_t operator()(std::pair<const ctlg::BusStop*, const ctlg::BusStop*> pair) const{
-            size_t hash = 0;
-            hash += std::hash<std::string>{}(pair.first->name) * 37 ^ 2; 
-            hash += std::hash<std::string>{}(pair.second->name) * 37;
-            return hash;
-        }
-    };
-
-}
 
 
 class TransportCatalogue{
@@ -74,7 +25,7 @@ public:
 
     const BusStop* GetStop(std::string_view name) const ;
 
-    BusRoute GetRoute(std::string_view num) const ;
+    const BusRoute* GetRoute(std::string_view num) const ;
 
     size_t GetUniqueStopsForRoute(std::string_view num) const ;
 
@@ -86,7 +37,6 @@ public:
 
     int GetDistanceBetweenStops(std::string_view stop1, std::string_view stop2) const ; 
 
-    
 
 private:
 
@@ -94,11 +44,11 @@ private:
     const BusStop* CreateBusStop(std::string_view name); 
 
     
-    std::deque<BusStop> busStop_database;
-    std::deque<BusRoute> busRoute_database;
-    std::unordered_map<std::string_view, const BusStop*> name_busStop_database;
-    std::unordered_map<std::string_view, const BusRoute*> name_busRoute_database;
-    std::unordered_map<std::string_view, std::unordered_set<std::string_view>> busStop_busRoute_dataBase; // остановка - ключ, маршрут - значение
+    std::deque<BusStop> busstop_database;
+    std::deque<BusRoute> busroute_database;
+    std::unordered_map<std::string_view, const BusStop*> name_busstop_database;
+    std::unordered_map<std::string_view, const BusRoute*> name_busroute_database;
+    std::unordered_map<std::string_view, std::unordered_set<std::string_view>> busstop_busroute_database; // остановка - ключ, маршрут - значение
     std::unordered_map<std::pair<const BusStop*, const BusStop*>, int, ctlg::Hash::BusA_BusB> distance_between_stops;
 };
 

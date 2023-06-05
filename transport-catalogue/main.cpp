@@ -1,10 +1,10 @@
 #include "transport_catalogue.h"
-#include "input_reader.h"
-#include "stat_reader.h"
-
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "json_reader.h"
+#include "request_handler.h"
+#include <fstream>
 
 using namespace std;
 using namespace ctlg;
@@ -13,20 +13,21 @@ using namespace detail;
 
 void Test1(){
     TransportCatalogue tr;
-   
 
+    Request handler(&tr);
 
-    AddNewNode(std::cin, tr);
+    JsonReader reader;
 
-    GetRouteInfo(std::cout, std::cin, tr);
-    
+    std::ifstream in("input.txt"); 
+    reader.LoadDocument(in);
+    reader.SetRequest(handler);
+
+    reader.GetInformation(std::cout, handler);
 
 }
 
 int main(){
 
-
-Test1();
+    Test1();
    
-    
 }

@@ -18,8 +18,8 @@ void Test1(){
 
     JsonReader reader;
 
-    std::ifstream in("input.txt"); 
-    reader.LoadDocument(in);
+    //std::ifstream in("input.txt"); 
+    reader.LoadDocument(std::cin);
     reader.SetRequest(handler);
 
     reader.GetInformation(std::cout, handler);

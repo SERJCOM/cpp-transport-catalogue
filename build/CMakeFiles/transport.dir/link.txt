@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -rdynamic CMakeFiles/transport.dir/main.cpp.o CMakeFiles/transport.dir/transport_catalogue.cpp.o CMakeFiles/transport.dir/domain.cpp.o CMakeFiles/transport.dir/json_reader.cpp.o CMakeFiles/transport.dir/request_handler.cpp.o CMakeFiles/transport.dir/json.cpp.o -o transport 

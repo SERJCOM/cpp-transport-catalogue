@@ -9,10 +9,10 @@ namespace ctlg{
 
 struct BusStop{
     BusStop() = default;
-    BusStop(Coordinates cord, std::string_view name);
-    BusStop(Coordinates cord, std::string name);
+    BusStop(geo::Coordinates cord, std::string_view name);
+    BusStop(geo::Coordinates cord, std::string name);
 
-    Coordinates coord;
+    geo::Coordinates coord;
     std::string name;
 };
 

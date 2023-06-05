@@ -4,6 +4,7 @@
 #include <sstream>
 #include "json_reader.h"
 #include "request_handler.h"
+#include <fstream>
 
 using namespace std;
 using namespace ctlg;
@@ -16,12 +17,13 @@ void Test1(){
     Request handler(&tr);
 
     JsonReader reader;
-    reader.LoadDocument(std::cin);
+
+    std::ifstream in("input.txt"); 
+    reader.LoadDocument(in);
     reader.SetRequest(handler);
 
     reader.GetInformation(std::cout, handler);
 
-    //GetRouteInfo(std::cout, std::cin, tr);
 }
 
 int main(){

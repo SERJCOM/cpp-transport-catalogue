@@ -184,8 +184,11 @@ Node LoadMap(std::istream& input) {
     bool correct = false;
     char c;
 
-    for (; input >> c && c != '}';) {
-        if (c == ',') {
+    for (; input >> c;) {
+        if(c == '}'){
+            break;
+        }
+        if (c == ',' || c == ' ') {
             input >> c;
         }
         std::string key = LoadString(input).AsString();
@@ -227,10 +230,11 @@ Node LoadBool(std::istream& input){
     std::string temp_str;
 
     char c;
-    while(input >> c){
+    while(true){
         if(temp_str == "true" || temp_str == "false"){
             break;
         }
+        input >> c;
         temp_str.push_back(c);
         if(reserved_words.find(c) != std::string::npos){
             break;
@@ -246,7 +250,7 @@ Node LoadBool(std::istream& input){
         return Node(false);
     }
 
-    throw json::ParsingError(temp_str);
+    throw json::ParsingError("ошибка " + temp_str );
 }
 
 Node LoadNode(std::istream& input) {

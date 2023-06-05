@@ -1,5 +1,6 @@
 #include "json_reader.h"
 #include <string>
+#include <set>
 
 using namespace ctlg;
 
@@ -16,49 +17,33 @@ void ctlg::JsonReader::SetRequest(Request &request)
         if(nodedict.at("type").AsString() == "Bus"){
             BusRoute bus;
 
-            std::cout << "1 BUS" << std::endl;
            std::string name = nodedict.at("name").AsString();
-          std::cout << "2 BUS" << std::endl;
-            
+
            std::vector<std::string> stops;
            if(nodedict.at("is_roundtrip").AsBool()){
             bus.type = ctlg::BusRoute::Type::CYCLIC;
-            std::cout << "3 BUS" << std::endl;
            }
-
-            
            else{
-           std::cout << "31 BUS" << std::endl;
             bus.type = ctlg::BusRoute::Type::STRAIGHT;
            }
-            std::cout << "4 BUS" << std::endl;
            
            for(auto i : nodedict.at("stops").AsArray()){
                 stops.push_back(i.AsString());
            }
-            std::cout << "5 BUS" << std::endl;
-            
-           request.SetBus(bus, stops);
-           std::cout << "6 BUS" << std::endl;
+
+           request.GetCatalogue()->AddBusRoute(stops, std::move(name), bus.type);
         }
         else if(nodedict.at("type").AsString() == "Stop"){
             std::string name = nodedict.at("name").AsString();
-            std::cout << "name " << name << std::endl;
             double latitude = nodedict.at("latitude").AsDouble();
             double longitude = nodedict.at("longitude").AsDouble();
-            std::cout << latitude << " " << longitude << std::endl;
             json::Dict distance = nodedict.at("road_distances").AsDict();
-            BusStop stop({latitude, longitude}, std::move(name));
+            BusStop stop({latitude, longitude}, name);
+
             request.GetCatalogue()->AddBusStop(stop);
-            std::cout << "1 STOP" << std::endl;
-            std::cout << (bool)(request.GetCatalogue()->GetStop("name") == nullptr) <<  "bool" << std::endl;
-            std::cout << "2 STOP" << std::endl;
             for(auto i : distance){
                 request.GetCatalogue()->SetDistanceBetweenStops(name, i.first, i.second.AsDouble()) ;
-               
             }
-
-            std::cout << "3 STOP" << std::endl;
         }
     }
     
@@ -67,80 +52,63 @@ void ctlg::JsonReader::SetRequest(Request &request)
 
 void ctlg::JsonReader::GetInformation(std::ostream &output, Request &request){
 
-    json::Array output_d;
-
     auto stat_requests = doc_.GetRoot().AsDict().at("stat_requests").AsArray();
 
-    std::cout << "1 OK" << std::endl;
+    json::Array result;
 
     for(auto i : stat_requests){
         if(i.AsDict().at("type").AsString() == "Stop"){
-
-            json::Dict answer;
-
             auto node = i.AsDict();
+
             int id = node.at("id").AsInt();
-            
             std::string name = node.at("name").AsString();
-            std::cout << "2 OK" << std::endl;
+            json::Dict answer;
             if(request.GetCatalogue()->BusStopExist(name)){
-                std::cout << "3 OK" << std::endl;
                json::Array buses ;
-
                const auto& set = request.GetCatalogue()->GetRouteByStop(name);
-
-                std::cout << "31 OK" << std::endl;
-
-               std::cout << set.size() << std::endl;
-
-                std::cout << "32 OK" << std::endl;
                 for(const auto& str : set){
-
-                    std::cout << str << std::endl;
                     buses.push_back(std::string(str));
                 }
-
-
+                std::sort(buses.begin(), buses.end(), [&](json::Node& node1, json::Node& node2){
+                    return node1.AsString() < node2.AsString();
+                });
                 answer["buses"] = std::move(buses);
-                std::cout << "4 OK" << std::endl;
             }
             else{
-                std::cout << "5 OK" << std::endl;
-                answer["error_message"] = "not found";
-            }
-
-            std::cout << "6 OK" << std::endl;
+                answer["error_message"] = json::Node(std::string("not found"));
+            }   
             answer["request_id"] = id;
-
-            json::Array temp;
-            temp.push_back(answer);
-
-            json::Print(json::Document(json::Node(temp)), output);
-
-            std::cout << "7 OK" << std::endl;
             
+            result.push_back(answer);
         }
-        else if(i.AsDict().at("Bus").AsString() == "Bus"){
-            json::Dict answer;
-
+        else if(i.AsDict().at("type").AsString() == "Bus"){
             auto node = i.AsDict();
-
             int id = node.at("id").AsInt(); 
-
             std::string name = node.at("name").AsString();
 
-            int route_length = request.GetRouteLength(name);
-            double length = request.GetGeoRouteLength(name);
+            json::Dict answer;
+            
 
-            answer["route_length"] = route_length;
-            answer["curvature"] = (double)route_length / length;
-            answer["unique_stop_count"] = (int)request.GetCatalogue()->GetUniqueStopsForRoute(name);
-            answer["stop_count"] = (int)request.GetCatalogue()->GetStops(name).size();
+            if(request.GetCatalogue()->GetRoute(name) == nullptr){
+                 answer["error_message"] = json::Node(std::string("not found"));
+            }else{
+                
+                int route_length = request.GetRouteLength(name);
+                double length = request.GetGeoRouteLength(name);
+                int count = (int)request.GetCatalogue()->GetStops(name).size();
+                if(request.GetCatalogue()->GetRouteType(name) == ctlg::BusRoute::Type::STRAIGHT){
+                    count = count * 2 - 1;
+                }
+                
+                answer["route_length"] = route_length;
+                answer["curvature"] = (double)route_length / length;
+                answer["unique_stop_count"] = (int)request.GetCatalogue()->GetUniqueStopsForRoute(name);
+                answer["stop_count"] = count;
+            }
+
             answer["request_id"] = id;
-
-            json::Print(json::Document(answer), output);
-
+            result.push_back(answer);
         }
     }
-
+    json::Print(json::Document(json::Node(result)), output);
 }

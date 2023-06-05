@@ -50,7 +50,7 @@ void ctlg::Request::AddNewNode(const std::string& str) {
         double first = stod(temp.Split(','));
         double second = stod(temp.Split(','));
 
-        Coordinates temp_cord{first, second};
+        geo::Coordinates temp_cord{first, second};
         catalogue_->AddBusStop(ctlg::BusStop(temp_cord, name));
 
         while(!temp.IsEnd()){
@@ -95,8 +95,10 @@ int ctlg::Request::GetRouteLength(std::string_view name) const
         length += catalogue_->GetDistanceBetweenStops(it->name, (it + 1)->name);
     }
 
-    if(catalogue_->GetRoute(name)->type == BusRoute::Type::CYCLIC){
-        length *= 2;
+    if(catalogue_->GetRoute(name)->type == BusRoute::Type::STRAIGHT){
+        for(auto it = stops.end() - 1; it != stops.begin(); it--){
+            length += catalogue_->GetDistanceBetweenStops(it->name, (it - 1)->name);
+        }
     }
 
     return length;
@@ -109,12 +111,13 @@ double ctlg::Request::GetGeoRouteLength(std::string_view name) const
     auto stops = catalogue_->GetStops(name);
 
     for(auto it = stops.begin(); it != stops.end() - 1; it++){
-        length += ctlg::ComputeDistance(it->coord, (it + 1)->coord);
+        length += geo::ComputeDistance(it->coord, (it + 1)->coord);
     }
 
-    if(catalogue_->GetRoute(name)->type == BusRoute::Type::CYCLIC){
+    if(catalogue_->GetRoute(name)->type == BusRoute::Type::STRAIGHT){
         length *= 2;
     }
+
 
     return length;
     
@@ -122,22 +125,8 @@ double ctlg::Request::GetGeoRouteLength(std::string_view name) const
 
 TransportCatalogue *ctlg::Request::GetCatalogue() const
 {
-    return catalogue_.get();
+    return catalogue_;
 }
-
-// void ctlg::AddNewNode(std::istream &in, ctlg::TransportCatalogue &catalogue)
-// {
-//     std::string line;
-//     std::getline(in, line);
-//     int num = stoi(line);
-
-//     for(int i = 0; i < num; i++){
-//         std::getline(in, line);
-//         ctlg::AddNewNode(line, catalogue);  
-//     }
-
-// }
-
 
 
 void ctlg::GetRouteInfo(std::ostream &out, std::istream& in, const ctlg::TransportCatalogue &ctl){

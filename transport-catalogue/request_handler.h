@@ -17,11 +17,11 @@ class Request{
 public:
     Request() = default;
 
-    Request(std::shared_ptr<TransportCatalogue> catalogue):catalogue_(catalogue){}
+    // Request(std::shared_ptr<TransportCatalogue> catalogue):catalogue_(catalogue){}
 
     Request(TransportCatalogue* catalogue):catalogue_(catalogue){}
 
-    void SetCatalogue(std::shared_ptr<TransportCatalogue> catalogue){
+    void SetCatalogue(TransportCatalogue* catalogue){
         catalogue_ = catalogue;
     }
 
@@ -43,7 +43,7 @@ public:
     
 private:
 
-std::shared_ptr<TransportCatalogue> catalogue_;
+TransportCatalogue* catalogue_;
 
 };
 

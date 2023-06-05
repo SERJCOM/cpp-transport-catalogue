@@ -1,3 +1,0 @@
-/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/CMakeFiles/transport.dir
-/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/CMakeFiles/edit_cache.dir
-/home/sergei/prog/practicum/cpp-transport-catalogue/transport-catalogue/CMakeFiles/rebuild_cache.dir

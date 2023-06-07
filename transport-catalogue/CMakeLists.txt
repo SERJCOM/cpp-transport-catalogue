@@ -7,4 +7,7 @@ add_executable(transport
  json_reader.cpp 
  request_handler.cpp 
  json.cpp
+ svg.cpp
+ map_renderer.cpp
  )
+

@@ -167,6 +167,24 @@ int TransportCatalogue::GetDistanceBetweenStops(std::string_view stop1, std::str
     return 0;
 }
 
+std::vector<std::string_view> ctlg::TransportCatalogue::GetRouteNames() const
+{
+    std::vector<std::string_view> res;
+    for(const BusRoute& route : busroute_database){
+        res.push_back(route.name);
+    }
+    return res;
+}
+
+std::vector<const BusRoute*> ctlg::TransportCatalogue::GetRouteDataBase() const
+{
+    std::vector<const BusRoute*> res;
+    for(const BusRoute& route : busroute_database){
+        res.push_back(&route);
+    }
+    return res;
+}
+
 const BusStop *TransportCatalogue::CreateBusStop(std::string_view name)
 {
     if(name_busstop_database.count(name) == 0){

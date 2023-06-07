@@ -2,6 +2,7 @@
 #include <string>
 #include <set>
 
+
 using namespace ctlg;
 
 void ctlg::JsonReader::LoadDocument(std::istream &input)
@@ -109,6 +110,72 @@ void ctlg::JsonReader::GetInformation(std::ostream &output, Request &request){
             answer["request_id"] = id;
             result.push_back(answer);
         }
+        else if(i.AsDict().at("type").AsString() == "Map"){
+            auto node = i.AsDict();
+            int id = node.at("id").AsInt(); 
+
+            json::Dict answer;
+
+            answer["request_id"] = id;
+
+            std::string map = request.RenderMap();
+
+            answer["map"] = map;
+
+            result.push_back(answer);
+        }
     }
     json::Print(json::Document(json::Node(result)), output);
+}
+
+void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
+{
+    auto render_settings = doc_.GetRoot().AsDict().at("render_settings").AsDict();
+
+
+    render.width = render_settings.at("width").AsDouble();
+    render.height = render_settings.at("height").AsDouble();
+    render.padding = render_settings.at("padding").AsDouble();
+    render.line_width = render_settings.at("line_width").AsDouble();
+    render.stop_radius = render_settings.at("stop_radius").AsDouble();
+    render.bus_label_font_size = render_settings.at("bus_label_font_size").AsDouble();
+
+    auto vector = render_settings.at("bus_label_offset").AsArray();
+    render.bus_label_offset.first = vector[0].AsDouble();
+    render.bus_label_offset.second = vector[1].AsDouble();
+
+    render.stop_label_font_size = render_settings.at("stop_label_font_size").AsDouble();
+
+    vector = render_settings.at("stop_label_offset").AsArray();
+    render.stop_label_offset.first = vector[0].AsDouble();
+    render.stop_label_offset.second = vector[1].AsDouble();
+
+    
+    if(render_settings.at("underlayer_color").IsArray()){
+        vector = render_settings.at("underlayer_color").AsArray();
+        if(vector.size() == 4)
+            render.underlayer_color = svg::Color(svg::Rgba(vector[0].AsInt(), vector[1].AsInt(), vector[2].AsInt(), vector[3].AsDouble()));
+        else{
+            render.underlayer_color = svg::Color(svg::Rgb(vector[0].AsInt(), vector[1].AsInt(), vector[2].AsInt()));
+        }
+    }
+    else{
+        render.underlayer_color = svg::Color(render_settings.at("underlayer_color").AsString());
+    }
+
+    render.underlayer_width = render_settings.at("underlayer_width").AsDouble();
+
+    for(const auto& i : render_settings.at("color_palette").AsArray() )
+    if(i.IsString())
+        render.color_palette.push_back(i.AsString());
+    else{
+        auto vector = i.AsArray();
+        if(i.size() == 4){
+            render.color_palette.push_back(svg::Color(svg::Rgba(vector[0].AsInt(), vector[1].AsInt(), vector[2].AsInt(), vector[3].AsDouble())));
+        }
+        else{
+            render.color_palette.push_back(svg::Color(svg::Rgb(vector[0].AsInt(), vector[1].AsInt(), vector[2].AsInt())));
+        }
+    }
+    
 }

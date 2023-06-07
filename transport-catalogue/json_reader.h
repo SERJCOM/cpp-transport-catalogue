@@ -2,6 +2,7 @@
 #include "json.h"
 #include "transport_catalogue.h"
 #include "request_handler.h"
+#include "map_renderer.h"
 
 
 namespace ctlg{
@@ -16,6 +17,8 @@ public:
     void SetRequest(Request& request);
 
     void GetInformation(std::ostream &output, Request &request);
+
+    void SetMapRenderer(MapRenderer& render);
 
 
 

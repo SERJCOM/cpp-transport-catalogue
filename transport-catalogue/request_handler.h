@@ -4,20 +4,17 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include "map_renderer.h"
+#include <cassert>
 
 namespace ctlg{
 
-// void AddNewNode(const std::string& str, ctlg::TransportCatalogue& catalogue);
-
-// void AddNewNode(std::istream& in, ctlg::TransportCatalogue& catalogue);
 
 void GetRouteInfo(std::ostream& out, std::istream& in, const ctlg::TransportCatalogue& ctl);
 
 class Request{
 public:
     Request() = default;
-
-    // Request(std::shared_ptr<TransportCatalogue> catalogue):catalogue_(catalogue){}
 
     Request(TransportCatalogue* catalogue):catalogue_(catalogue){}
 
@@ -37,7 +34,29 @@ public:
 
     double GetGeoRouteLength(std::string_view name) const ;
 
+    void SetRenderMap(ctlg::MapRenderer* map){
+        map_ = map;
+    }
 
+    std::string RenderMap(){
+        assert(map_ != nullptr);
+        std::ostringstream str;
+       
+        auto routes = catalogue_->GetRouteDataBase();
+
+        std::sort(routes.begin(), routes.end(), [&](auto route1, auto route2){
+            return route1->name < route2->name;
+        });
+
+        map_->DrawMap(str, routes);
+
+        return str.str();
+    }
+
+    
+    ctlg::MapRenderer* GetRenderMap(){
+        return map_;
+    }
 
     TransportCatalogue* GetCatalogue() const ;
     
@@ -45,34 +64,9 @@ private:
 
 TransportCatalogue* catalogue_;
 
+MapRenderer* map_;
+
 };
 
-
-
-namespace detail{
-class SplitIntoWord{
-    public:
-
-        SplitIntoWord(const std::string& str ): str(str) {};
-
-        std::string Split(char sym, int offset = 0) ;
-
-        std::string Split(char sym, std::string buffer, int offset = 0);
-
-        bool IsEnd(){
-            return (end ) == str.size();
-        }
-
-        void AddToBuffer(const std::string& str){
-            notof += str;
-            end += str.size();
-        }
-
-    private:
-        int end = 0;
-        const std::string& str;
-        std::string notof = " ";
-};
-}
 
 }

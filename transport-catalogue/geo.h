@@ -13,6 +13,14 @@ struct Coordinates {
     bool operator!=(const Coordinates& other) const {
         return !(*this == other);
     }
+
+    bool operator<(const Coordinates& other) const{
+        return std::pair(lat, lng) < std::pair(other.lat, other.lng);
+    }
+
+    bool operator>(const Coordinates& other) const{
+        return std::pair(lat, lng) > std::pair(other.lat, other.lng);
+    }
 };
 
 inline double ComputeDistance(Coordinates from, Coordinates to) {

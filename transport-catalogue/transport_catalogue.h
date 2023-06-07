@@ -37,6 +37,10 @@ public:
 
     int GetDistanceBetweenStops(std::string_view stop1, std::string_view stop2) const ; 
 
+    std::vector<std::string_view> GetRouteNames() const;
+
+    std::vector<const BusRoute*> GetRouteDataBase() const;
+
 
 private:
 

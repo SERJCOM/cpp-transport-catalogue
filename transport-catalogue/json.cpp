@@ -1,10 +1,7 @@
 #include "json.h"
 
 
-
 namespace ctlg{
-
-
 namespace json {
 
 namespace {

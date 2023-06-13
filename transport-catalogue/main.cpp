@@ -24,12 +24,11 @@ void Test1(){
 
     handler.SetRenderMap(&map);
 
-    //std::ifstream in("input.txt"); 
     reader.LoadDocument(std::cin);
     reader.SetRequest(handler);
     reader.SetMapRenderer(map);
 
-    reader.GetInformation(std::cout, handler);
+    std::cout << handler.RenderMap();
 
 }
 

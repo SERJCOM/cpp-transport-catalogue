@@ -102,8 +102,6 @@ double underlayer_width;
 std::vector<svg::Color> color_palette;
 
 
-
-
 void DrawMap(std::ostream& out, const std::vector<const ctlg::BusRoute*>& routes);
 
 

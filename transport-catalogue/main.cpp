@@ -28,7 +28,8 @@ void Test1(){
     reader.SetRequest(handler);
     reader.SetMapRenderer(map);
 
-    std::cout << handler.RenderMap();
+    reader.GetInformation(std::cout, handler);
+
 
 }
 

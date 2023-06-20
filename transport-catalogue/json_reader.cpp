@@ -1,6 +1,7 @@
 #include "json_reader.h"
 #include <string>
 #include <set>
+#include "json_builder.h"
 
 
 using namespace ctlg;
@@ -55,7 +56,9 @@ void ctlg::JsonReader::GetInformation(std::ostream &output, Request &request){
 
     auto stat_requests = doc_.GetRoot().AsDict().at("stat_requests").AsArray();
 
-    json::Array result;
+    json::Builder builder;
+
+    builder.StartArray();
 
     for(auto i : stat_requests){
         if(i.AsDict().at("type").AsString() == "Stop"){
@@ -63,9 +66,12 @@ void ctlg::JsonReader::GetInformation(std::ostream &output, Request &request){
 
             int id = node.at("id").AsInt();
             std::string name = node.at("name").AsString();
-            json::Dict answer;
+
+            builder.StartDict();
+
             if(request.GetCatalogue()->BusStopExist(name)){
                json::Array buses ;
+
                const auto& set = request.GetCatalogue()->GetRouteByStop(name);
                 for(const auto& str : set){
                     buses.push_back(std::string(str));
@@ -73,25 +79,25 @@ void ctlg::JsonReader::GetInformation(std::ostream &output, Request &request){
                 std::sort(buses.begin(), buses.end(), [&](json::Node& node1, json::Node& node2){
                     return node1.AsString() < node2.AsString();
                 });
-                answer["buses"] = std::move(buses);
+                builder.Key("buses").Value(std::move(buses));
             }
             else{
-                answer["error_message"] = json::Node(std::string("not found"));
+                builder.Key("error_message").Value(std::string("not found"));
             }   
-            answer["request_id"] = id;
+
+            builder.Key("request_id").Value(id);
             
-            result.push_back(answer);
+            builder.EndDict();
         }
         else if(i.AsDict().at("type").AsString() == "Bus"){
             auto node = i.AsDict();
             int id = node.at("id").AsInt(); 
             std::string name = node.at("name").AsString();
 
-            json::Dict answer;
-            
+            builder.StartDict();
 
             if(request.GetCatalogue()->GetRoute(name) == nullptr){
-                 answer["error_message"] = json::Node(std::string("not found"));
+                builder.Key("error_message").Value(std::string("not found"));
             }else{
                 
                 int route_length = request.GetRouteLength(name);
@@ -101,31 +107,37 @@ void ctlg::JsonReader::GetInformation(std::ostream &output, Request &request){
                     count = count * 2 - 1;
                 }
                 
-                answer["route_length"] = route_length;
-                answer["curvature"] = (double)route_length / length;
-                answer["unique_stop_count"] = (int)request.GetCatalogue()->GetUniqueStopsForRoute(name);
-                answer["stop_count"] = count;
+
+                builder.Key("route_length").Value(route_length);
+                builder.Key("curvature").Value((double)route_length / length);
+                builder.Key("unique_stop_count").Value((int)request.GetCatalogue()->GetUniqueStopsForRoute(name));
+                builder.Key("stop_count").Value(count);
             }
 
-            answer["request_id"] = id;
-            result.push_back(answer);
+            builder.Key("request_id").Value(id);
+
+            builder.EndDict();
+
         }
         else if(i.AsDict().at("type").AsString() == "Map"){
             auto node = i.AsDict();
             int id = node.at("id").AsInt(); 
 
-            json::Dict answer;
+            builder.StartDict();
 
-            answer["request_id"] = id;
+            builder.Key("request_id").Value(id);
 
             std::string map = request.RenderMap();
 
-            answer["map"] = map;
+            builder.Key("map").Value(map);
 
-            result.push_back(answer);
+            builder.EndDict();
+
         }
     }
-    json::Print(json::Document(json::Node(result)), output);
+
+    builder.EndArray();
+    json::Print(json::Document(builder.Build()), output);
 }
 
 void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
@@ -170,7 +182,7 @@ void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
         render.color_palette.push_back(i.AsString());
     else{
         auto vector = i.AsArray();
-        if(i.size() == 4){
+        if(vector.size() == 4){
             render.color_palette.push_back(svg::Color(svg::Rgba(vector[0].AsInt(), vector[1].AsInt(), vector[2].AsInt(), vector[3].AsDouble())));
         }
         else{

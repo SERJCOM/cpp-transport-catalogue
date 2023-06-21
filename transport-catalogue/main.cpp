@@ -16,7 +16,7 @@ using namespace ctlg;
 void Test1(){
     TransportCatalogue tr;
 
-    Request handler(&tr);
+    RequestHandler handler(&tr);
 
     JsonReader reader;
 
@@ -25,11 +25,10 @@ void Test1(){
     handler.SetRenderMap(&map);
 
     reader.LoadDocument(std::cin);
-    reader.SetRequest(handler);
+    reader.ParseData(handler);
     reader.SetMapRenderer(map);
 
-    std::cout << handler.RenderMap();
-
+    reader.PrintInformation(std::cout, handler);
 }
 
 int main(){

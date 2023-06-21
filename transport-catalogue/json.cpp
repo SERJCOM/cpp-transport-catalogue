@@ -278,21 +278,6 @@ Node LoadNode(std::istream& input) {
 
 }  // namespace
 
-Node::Node(Array array)
-    : data_(std::move(array)) {}
-
-Node::Node(Map map)
-    : data_(std::move(map)) {}
-
-Node::Node(int value)
-    : data_(value) {}
-
-Node::Node(std::string value)
-    : data_(std::move(value)) {}
-
-Node::Node(bool value):data_(value){}
-
-Node::Node(double value): data_(value){}
 
 
 
@@ -420,22 +405,22 @@ void PrintValue(std::nullptr_t,  std::ostream& out){
 }
 
 void PrintValue(const Array& value,  std::ostream& out){
-    out << "[ ";
+    out << "[\n";
     for(size_t i = 0; i < value.size(); i++){
         std::visit([&out](const auto& value){
         PrintValue(value, out);
         }, value[i].GetValue());
 
         if(i != value.size() - 1){
-            out << ", ";
+            out << ",\n";
         }
     }
-    out << " ]";
+    out << " \n]";
 }
 
 
 void PrintValue(const Map& value, std::ostream& out){
-    out << "{ ";
+    out << "{\n";
     for(auto i = value.begin(); i != value.end(); i++){
 
         if(i != value.begin()){
@@ -448,7 +433,7 @@ void PrintValue(const Map& value, std::ostream& out){
         }, i->second.GetValue());
 
     }
-    out << " }";
+    out << " \n}" ;
 }
 
 

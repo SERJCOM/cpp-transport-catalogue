@@ -32,15 +32,11 @@ public:
     data_ = null;
    }
     
-    Node(Array array);
-    Node(Map map);
-    Node(int value);
-    Node(std::string value);
-    Node(bool value);
-    Node(double value);
-    Node(std::nullptr_t value):data_(value){
+    // Node(Value value):data_(value){}
 
-    }
+    template<typename T>
+    Node(T value): data_(value){}
+    
     
     
     bool IsInt() const;

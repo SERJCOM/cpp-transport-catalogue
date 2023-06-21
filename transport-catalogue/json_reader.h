@@ -14,9 +14,9 @@ public:
 
     void LoadDocument(std::istream& input);
 
-    void SetRequest(Request& request);
+    void ParseData(RequestHandler& request);
 
-    void GetInformation(std::ostream &output, Request &request);
+    void PrintInformation(std::ostream &output, RequestHandler &request);
 
     void SetMapRenderer(MapRenderer& render);
 

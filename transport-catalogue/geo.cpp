@@ -2,7 +2,7 @@
 
 using namespace geo;
 
-inline double ComputeDistance(Coordinates from, Coordinates to) {
+double geo::ComputeDistance(geo::Coordinates from, geo::Coordinates to) {
     using namespace std;
     if (from == to) {
         return 0;

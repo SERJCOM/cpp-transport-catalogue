@@ -8,7 +8,7 @@
 using namespace ctlg;
 
 
-int ctlg::Request::GetRouteLength(std::string_view name) const
+int ctlg::RequestHandler::GetRouteLength(std::string_view name) const
 {
     int length = 0;
 
@@ -27,7 +27,7 @@ int ctlg::Request::GetRouteLength(std::string_view name) const
     return length;
 }
 
-double ctlg::Request::GetGeoRouteLength(std::string_view name) const
+double ctlg::RequestHandler::GetGeoRouteLength(std::string_view name) const
 {
     double length = 0;
 
@@ -46,7 +46,7 @@ double ctlg::Request::GetGeoRouteLength(std::string_view name) const
     
 }
 
-TransportCatalogue *ctlg::Request::GetCatalogue() const
+TransportCatalogue *ctlg::RequestHandler::GetCatalogue() const
 {
     return catalogue_;
 }
@@ -54,17 +54,17 @@ TransportCatalogue *ctlg::Request::GetCatalogue() const
 
 
 
-void ctlg::Request::SetStop(const BusStop &stop)
+void ctlg::RequestHandler::SetStop(const BusStop &stop)
 {
     catalogue_->AddBusStop(stop);
 }
 
-void ctlg::Request::SetBus(const BusRoute &route, const std::vector<std::string> &stops)
+void ctlg::RequestHandler::SetBus(const BusRoute &route, const std::vector<std::string> &stops)
 {
     catalogue_->AddBusRoute(stops, route.name, route.type);
 }
 
-void ctlg::Request::SetDistance(std::string_view stop1, std::string_view stop2, double distance){
+void ctlg::RequestHandler::SetDistance(std::string_view stop1, std::string_view stop2, double distance){
     catalogue_->SetDistanceBetweenStops(stop1, stop2, distance);
 }
 

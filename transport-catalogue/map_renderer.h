@@ -11,6 +11,22 @@ namespace ctlg{
     inline const double EPSILON = 1e-6;
 bool IsZero(double value) ;
 
+
+struct MapRenderData{
+    double width;
+    double height;
+    double padding;
+    double line_width;
+    double stop_radius;
+    double bus_label_font_size;
+    std::pair<double, double> bus_label_offset;
+    double stop_label_font_size;
+    std::pair<double, double> stop_label_offset;
+    svg::Color underlayer_color;
+    double underlayer_width;
+    std::vector<svg::Color> color_palette;
+    };
+
 class SphereProjector {
 public:
 // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
@@ -88,18 +104,7 @@ MapRenderer(){
 }
 
 
-double width;
-double height;
-double padding;
-double line_width;
-double stop_radius;
-double bus_label_font_size;
-std::pair<double, double> bus_label_offset;
-double stop_label_font_size;
-std::pair<double, double> stop_label_offset;
-svg::Color underlayer_color;
-double underlayer_width;
-std::vector<svg::Color> color_palette;
+MapRenderData data_;
 
 
 void DrawMap(std::ostream& out, const std::vector<const ctlg::BusRoute*>& routes);
@@ -108,6 +113,13 @@ void DrawMap(std::ostream& out, const std::vector<const ctlg::BusRoute*>& routes
 private:
 
 SphereProjector projector;
+
+svg::Text CreateText(const BusRoute* route , int pos);
+
+svg::Text CreatePodlozhka(const svg::Text& text);
+
+
+std::vector<const BusStop*> CreateLines(const BusRoute* route, svg::Document& doc, int pos);
 
 // void DrawRoute(std::ostream& out, const BusRoute& route);
 

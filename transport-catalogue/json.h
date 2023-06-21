@@ -28,41 +28,32 @@ public:
     //     variant = value;
     // }
 
-    bool IsInt() const {
-        return std::holds_alternative<int>(*this);
-    }
-    int AsInt() const {
-        using namespace std::literals;
-        if (!IsInt()) {
-            throw std::logic_error("Not an int"s);
-        }
-        return std::get<int>(*this);
-    }
+   Node(){
+    std::nullptr_t null;
+    data_ = null;
+   }
+    
+    Node(Array array);
+    Node(Map map);
+    Node(int value);
+    Node(std::string value);
+    Node(bool value);
+    Node(double value);
+    Node(std::nullptr_t value):data_(value){
 
-    bool IsPureDouble() const {
-        return std::holds_alternative<double>(*this);
     }
-    bool IsDouble() const {
-        return IsInt() || IsPureDouble();
-    }
-    double AsDouble() const {
-        using namespace std::literals;
-        if (!IsDouble()) {
-            throw std::logic_error("Not a double"s);
-        }
-        return IsPureDouble() ? std::get<double>(*this) : AsInt();
-    }
-
-    bool IsBool() const {
-        return std::holds_alternative<bool>(*this);
-    }
-    bool AsBool() const {
-        using namespace std::literals;
-        if (!IsBool()) {
-            throw std::logic_error("Not a bool"s);
-        }
-
-        return std::get<bool>(*this);
+    
+    
+    bool IsInt() const;
+    bool IsDouble() const; 
+    bool IsPureDouble() const; 
+    bool IsBool() const;
+    bool IsString() const;
+    bool IsNull() const;
+    bool IsArray() const;
+    bool IsMap() const;
+    bool IsDict() const{
+        return IsMap();
     }
 
     bool IsNull() const {

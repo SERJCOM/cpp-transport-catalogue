@@ -12,11 +12,11 @@ namespace ctlg{
 
 void GetRouteInfo(std::ostream& out, std::istream& in, const ctlg::TransportCatalogue& ctl);
 
-class Request{
+class RequestHandler{
 public:
-    Request() = default;
+    RequestHandler() = default;
 
-    Request(TransportCatalogue* catalogue):catalogue_(catalogue){}
+    RequestHandler(TransportCatalogue* catalogue):catalogue_(catalogue){}
 
     void SetCatalogue(TransportCatalogue* catalogue){
         catalogue_ = catalogue;

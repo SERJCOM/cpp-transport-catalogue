@@ -3,45 +3,40 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <variant>
 #include <vector>
+#include <variant>
+
+namespace ctlg{
 
 namespace json {
 
 class Node;
-using Dict = std::map<std::string, Node>;
+// Сохраните объявления Map и Array без изменения
+using Map = std::map<std::string, Node>;
+using Dict = Map;
 using Array = std::vector<Node>;
+using Value =  std::variant<std::nullptr_t, int, double, std::string, bool, Array, Map>;
 
+// Эта ошибка должна выбрасываться при ошибках парсинга JSON
 class ParsingError : public std::runtime_error {
 public:
     using runtime_error::runtime_error;
 };
 
-class Node final
-    : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
+class Node {
 public:
-    using variant::variant;
-    using Value = variant;
-
-    Node(Value value) : variant(std::move(value)) {}
-    // Node& operator=(Value value){
-    //     variant = value;
-    // }
+   /* Реализуйте Node, используя std::variant */
 
    Node(){
     std::nullptr_t null;
     data_ = null;
    }
     
-    Node(Array array);
-    Node(Map map);
-    Node(int value);
-    Node(std::string value);
-    Node(bool value);
-    Node(double value);
-    Node(std::nullptr_t value):data_(value){
+    // Node(Value value):data_(value){}
 
-    }
+    template<typename T>
+    Node(T value): data_(value){}
+    
     
     
     bool IsInt() const;
@@ -55,94 +50,58 @@ public:
     bool IsDict() const{
         return IsMap();
     }
+    
+    
+    int AsInt() const;
+    bool AsBool() const;
+    double AsDouble() const;
+    const std::string& AsString() const;
+    const Array& AsArray() const;
+    const Map& AsMap() const;
 
-    bool IsNull() const {
-        return std::holds_alternative<std::nullptr_t>(*this);
+    Value GetValue() const;
+    const Map& AsDict() const{
+        return AsMap();
     }
 
-    bool IsArray() const {
-        return std::holds_alternative<Array>(*this);
-    }
-    const Array& AsArray() const {
-        using namespace std::literals;
-        if (!IsArray()) {
-            throw std::logic_error("Not an array"s);
-        }
 
-        return std::get<Array>(*this);
+    int size() const{
+        return std::get<Array>(data_).size();
     }
 
-    bool IsString() const {
-        return std::holds_alternative<std::string>(*this);
-    }
-    const std::string& AsString() const {
-        using namespace std::literals;
-        if (!IsString()) {
-            throw std::logic_error("Not a string"s);
-        }
+    bool operator==(const Node& n) const ;
 
-        return std::get<std::string>(*this);
-    }
+    bool operator!=(const Node& n) const;
 
-    bool IsDict() const {
-        return std::holds_alternative<Dict>(*this);
-    }
-    const Dict& AsDict() const {
-        using namespace std::literals;
-        if (!IsDict()) {
-            throw std::logic_error("Not a dict"s);
-        }
+private:
 
-        return std::get<Dict>(*this);
-    }
-
-    bool operator==(const Node& rhs) const {
-        return GetValue() == rhs.GetValue();
-    }
-
-    const Value& GetValue() const {
-        return *this;
-    }
-
-    Value& GetValue(){
-        return *this;
-    }
+    Value data_;
 };
-
-
-
-
-inline bool operator!=(const Node& lhs, const Node& rhs) {
-    return !(lhs == rhs);
-}
 
 class Document {
 public:
 
     Document() = default;
+    explicit Document(Node root);
 
-    explicit Document(Node root)
-        : root_(std::move(root)) {
+    const Node& GetRoot() const;
+
+    bool operator==(const Document& doc) const{
+        return root_ == doc.root_;
     }
 
-    const Node& GetRoot() const {
-        return root_;
+    bool operator!=(const Document& doc) const{
+        return !(root_ == doc.root_);
     }
 
 private:
     Node root_;
 };
 
-inline bool operator==(const Document& lhs, const Document& rhs) {
-    return lhs.GetRoot() == rhs.GetRoot();
-}
-
-inline bool operator!=(const Document& lhs, const Document& rhs) {
-    return !(lhs == rhs);
-}
-
 Document Load(std::istream& input);
 
 void Print(const Document& doc, std::ostream& output);
 
 }  // namespace json
+
+}

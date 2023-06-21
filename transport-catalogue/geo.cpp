@@ -29,7 +29,3 @@ bool Coordinates::operator<(const Coordinates& other) const{
 bool Coordinates::operator>(const Coordinates& other) const{
     return std::pair(lat, lng) > std::pair(other.lat, other.lng);
 }
-
-
-
-}

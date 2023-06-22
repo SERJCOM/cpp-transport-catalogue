@@ -129,13 +129,24 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
     json::Print(json::Document(json::Node(result)), output);
 }
 
-svg::Color ParsingColor(const json::Array& array){
-    if(array.size() == 4){
-        return svg::Color(svg::Rgba(array[0].AsInt(), array[1].AsInt(), array[2].AsInt(), array[3].AsDouble()));
-    }
+svg::Color ParsingColor(const json::Node& node){
 
-    return svg::Color(svg::Rgb(array[0].AsInt(), array[1].AsInt(), array[2].AsInt()));
+
+    if(node.IsArray()){
+        auto array = node.AsArray();
+
+        if(array.size() == 4){
+            return svg::Color(svg::Rgba(array[0].AsInt(), array[1].AsInt(), array[2].AsInt(), array[3].AsDouble()));
+        }
+
+        return svg::Color(svg::Rgb(array[0].AsInt(), array[1].AsInt(), array[2].AsInt()));
+    }
+    else{
+        return svg::Color(node.AsString());
+    }
+    
 }
+
 
 void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
 {
@@ -162,13 +173,8 @@ void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
     data.stop_label_offset.second = vector[1].AsDouble();
 
     
-    if(render_settings.at("underlayer_color").IsArray()){
-        vector = render_settings.at("underlayer_color").AsArray();
-        data.underlayer_color = ParsingColor(vector);
-    }
-    else{
-        data.underlayer_color = svg::Color(render_settings.at("underlayer_color").AsString());
-    }
+    data.underlayer_color = ParsingColor(render_settings.at("underlayer_color"));
+
 
     data.underlayer_width = render_settings.at("underlayer_width").AsDouble();
 

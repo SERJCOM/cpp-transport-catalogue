@@ -35,7 +35,7 @@ public:
     // Node(Value value):data_(value){}
 
     template<typename T>
-    Node(T value): data_(value){}
+    Node(T value): data_(std::move(value)){}
     
     
     

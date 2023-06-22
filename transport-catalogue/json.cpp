@@ -1,7 +1,7 @@
 #include "json.h"
 
 
-namespace ctlg{
+
 namespace json {
 
 namespace {
@@ -175,7 +175,7 @@ Node LoadString(std::istream& input) {
 }
 
 Node LoadMap(std::istream& input) {
-    Map result;
+    Dict result;
 
     DeleteSpace(input);
     bool correct = false;
@@ -259,7 +259,7 @@ Node LoadNode(std::istream& input) {
 
     if (c == '[') {             // array
         return LoadArray(input);    
-    } else if (c == '{') {          // Map
+    } else if (c == '{') {          // Dict
         return LoadMap(input);
     } else if (c == '"') {          // string
         return LoadString(input);
@@ -282,27 +282,23 @@ Node LoadNode(std::istream& input) {
 
 
 const Array& Node::AsArray() const {
-    if(!std::holds_alternative<Array>(data_)){
+    if(!std::holds_alternative<Array>(*this)){
         throw std::logic_error("что-то идет не по плану");
     }
-    return std::get<Array>(data_);
+    return std::get<Array>(*this);
 }
 
-const Map& Node::AsMap() const {
-    if(!std::holds_alternative<Map>(data_)){
+const Dict& Node::AsDict() const {
+    if(!std::holds_alternative<Dict>(*this)){
         throw std::logic_error("что-то идет не по плану");
     }
-    return std::get<Map>(data_);
+    return std::get<Dict>(*this);
 }
 
-Value Node::GetValue() const
-{
-    return data_;
-}
 
 bool Node::operator==(const Node &n) const
 {
-    return data_ == n.data_;
+    return *this == n;
 }
 
 bool Node::operator!=(const Node &n) const
@@ -311,37 +307,37 @@ bool Node::operator!=(const Node &n) const
 }
 
 int Node::AsInt() const {
-    if(!std::holds_alternative<int>(data_)){
+    if(!std::holds_alternative<int>(*this)){
         throw std::logic_error("что-то идет не по плану");
     }
-    return std::get<int>(data_);
+    return std::get<int>(*this);
 }
 
 bool Node::AsBool() const
 {
-    if(!std::holds_alternative<bool>(data_)){
+    if(!std::holds_alternative<bool>(*this)){
         throw std::logic_error("что-то идет не по плану");
     }
 
-return std::get<bool>(data_);
+return std::get<bool>(*this);
 }
 
 double Node::AsDouble() const
 {
-    if(std::holds_alternative<double>(data_)){
-        return std::get<double>(data_);
+    if(std::holds_alternative<double>(*this)){
+        return std::get<double>(*this);
     }
-    if(std::holds_alternative<int>(data_)){
-        return std::get<int>(data_);
+    if(std::holds_alternative<int>(*this)){
+        return std::get<int>(*this);
     }
     throw std::logic_error("что-то идет не по плану");
 }
 
 const std::string& Node::AsString() const {
-    if(!std::holds_alternative<std::string>(data_)){
+    if(!std::holds_alternative<std::string>(*this)){
         throw std::logic_error("что-то идет не по плану");
     }
-    return std::get<std::string>(data_);
+    return std::get<std::string>(*this);
 }
 
 Document::Document(Node root)
@@ -365,7 +361,7 @@ void PrintValue(bool value,  std::ostream& out){
     }
 }
 
-void PrintValue(const Map& value, std::ostream& out);
+void PrintValue(const Dict& value, std::ostream& out);
 
 void PrintValue(int value,  std::ostream& out){
     out << value;
@@ -419,7 +415,7 @@ void PrintValue(const Array& value,  std::ostream& out){
 }
 
 
-void PrintValue(const Map& value, std::ostream& out){
+void PrintValue(const Dict& value, std::ostream& out){
     out << "{ ";
     for(auto i = value.begin(); i != value.end(); i++){
 
@@ -448,7 +444,7 @@ void Print(const Document& doc, std::ostream& output) {
 
 bool Node::IsInt() const
 {
-    return std::holds_alternative<int>(data_);
+    return std::holds_alternative<int>(*this);
 }
 
 bool Node::IsDouble() const
@@ -458,34 +454,33 @@ bool Node::IsDouble() const
 
 bool Node::IsPureDouble() const
 {
-    return std::holds_alternative<double>(data_);
+    return std::holds_alternative<double>(*this);
 }
 
 bool Node::IsBool() const
 {
-    return std::holds_alternative<bool>(data_);
+    return std::holds_alternative<bool>(*this);
 }
 
 bool Node::IsString() const
 {
-    return std::holds_alternative<std::string>(data_);
+    return std::holds_alternative<std::string>(*this);
 }
 
 bool Node::IsNull() const
 {
-    return std::holds_alternative<std::nullptr_t>(data_);
+    return std::holds_alternative<std::nullptr_t>(*this);
 }
 
 bool Node::IsArray() const
 {
-    return std::holds_alternative<Array>(data_);
+    return std::holds_alternative<Array>(*this);
 }
 
-bool Node::IsMap() const
+bool Node::IsDict() const
 {
-    return std::holds_alternative<Map>(data_);
+    return std::holds_alternative<Dict>(*this);
 }
 
 } 
 
-}

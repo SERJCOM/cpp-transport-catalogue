@@ -9,7 +9,6 @@ add_executable(transport
  json.cpp
  svg.cpp
  map_renderer.cpp
-
- geo.cpp
+ json_builder.cpp
  )
 

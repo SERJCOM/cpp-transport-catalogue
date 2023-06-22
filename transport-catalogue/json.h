@@ -6,16 +6,16 @@
 #include <vector>
 #include <variant>
 
-namespace ctlg{
+
 
 namespace json {
 
 class Node;
 // Сохраните объявления Map и Array без изменения
-using Map = std::map<std::string, Node>;
-using Dict = Map;
+
+using Dict = std::map<std::string, Node>;
 using Array = std::vector<Node>;
-using Value =  std::variant<std::nullptr_t, int, double, std::string, bool, Array, Map>;
+
 
 // Эта ошибка должна выбрасываться при ошибках парсинга JSON
 class ParsingError : public std::runtime_error {
@@ -23,24 +23,17 @@ public:
     using runtime_error::runtime_error;
 };
 
-class Node {
+class Node final
+    : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
 public:
    /* Реализуйте Node, используя std::variant */
 
-   Node(){
-    std::nullptr_t null;
-    data_ = null;
-   }
+   using variant::variant;
+    using Value = variant;
     
-    Node(Array array);
-    Node(Map map);
-    Node(int value);
-    Node(std::string value);
-    Node(bool value);
-    Node(double value);
-    Node(std::nullptr_t value):data_(value){
 
-    }
+    Node(Value value) : variant(std::move(value)) {}
+    
     
     
     bool IsInt() const;
@@ -50,10 +43,7 @@ public:
     bool IsString() const;
     bool IsNull() const;
     bool IsArray() const;
-    bool IsMap() const;
-    bool IsDict() const{
-        return IsMap();
-    }
+    bool IsDict() const;
     
     
     int AsInt() const;
@@ -61,25 +51,27 @@ public:
     double AsDouble() const;
     const std::string& AsString() const;
     const Array& AsArray() const;
-    const Map& AsMap() const;
+    const Dict& AsDict() const;
 
-    Value GetValue() const;
-    const Map& AsDict() const{
-        return AsMap();
+    const Value& GetValue() const{
+        return *this;
     }
 
+    Value& GetValue(){
+        return *this;
+    }
+
+    
 
     int size() const{
-        return std::get<Array>(data_).size();
+        return std::get<Array>(*this).size();
     }
 
     bool operator==(const Node& n) const ;
 
     bool operator!=(const Node& n) const;
 
-private:
 
-    Value data_;
 };
 
 class Document {
@@ -108,4 +100,3 @@ void Print(const Document& doc, std::ostream& output);
 
 }  // namespace json
 
-}

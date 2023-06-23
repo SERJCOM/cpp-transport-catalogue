@@ -16,5 +16,5 @@ struct Coordinates {
     bool operator>(const Coordinates& other) const;
 };
 
-double ComputeDistance(Coordinates from, Coordinates to) ;
+    double ComputeDistance(Coordinates from, Coordinates to) ;
 }

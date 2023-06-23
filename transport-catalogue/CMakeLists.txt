@@ -10,5 +10,6 @@ add_executable(transport
  svg.cpp
  map_renderer.cpp
  json_builder.cpp
+ geo.cpp
  )
 

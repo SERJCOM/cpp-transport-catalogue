@@ -3,42 +3,34 @@
 
 using namespace json;
 
-KeyItemContext json::Builder::Key(std::string_view name)
+
+Builder::KeyItemContext json::Builder::Key(std::string_view name)
 {
-    if( !CheckDict() || Key_.has_value()){
+    if( !CheckDict() || key_.has_value()){
         throw std::logic_error("ОШИБКА С КЛЮЧОМ");
     }
 
-    Key_ = std::string(name);
+    key_ = std::string(name);
 
     return KeyItemContext(*this);
 }
 
-BaseItemContext json::Builder::Value(Node::Value value)
+Builder::BaseItemContext json::Builder::Value(Node::Value value)
 {   
-    auto temp = BuildDictArray(value, false);
-
-    return BaseItemContext(*temp);
+    return BaseItemContext(*BuildDictArray(std::move(value), false));
 }
 
-DictItemContext json::Builder::StartDict()
+Builder::DictItemContext json::Builder::StartDict()
 {
-    Dict temp;
-    
-    auto temp_dict = BuildDictArray(temp, true);
-
-    return DictItemContext(*temp_dict);
+    return DictItemContext(*BuildDictArray(Dict{}, true));
 }
 
-ArrayItemContext json::Builder::StartArray(){
-    Array temp;
-
-    auto temp_array = BuildDictArray(temp, true);
-
-    return ArrayItemContext(*temp_array);
+Builder::ArrayItemContext json::Builder::StartArray()
+{
+    return ArrayItemContext(*BuildDictArray(Array{}, true));
 }
 
-BaseItemContext json::Builder::EndDict(){
+Builder::BaseItemContext json::Builder::EndDict(){
     if( !CheckDict()){
         throw std::logic_error("ОШИБКА В КОНЦЕ СЛОВАРЯ");
     }
@@ -46,7 +38,8 @@ BaseItemContext json::Builder::EndDict(){
     return BaseItemContext(*this);
 }
 
-BaseItemContext json::Builder::EndArray(){
+
+Builder::BaseItemContext json::Builder::EndArray(){
     if( !CheckArray()){
         throw std::logic_error("ОШИБКА В КОНЦЕ МАССИВА");
     }
@@ -56,7 +49,7 @@ BaseItemContext json::Builder::EndArray(){
 
 json::Node json::Builder::Build()
 {   
-    if(nodes_stack_.size() != 1 || std::holds_alternative<std::nullptr_t>(root_.GetValue())) {
+    if(nodes_stack_.size() != 1 || root_.IsNull() ) {
         throw std::logic_error("JSON недостроен");
     }
 
@@ -65,35 +58,33 @@ json::Node json::Builder::Build()
     return root_;
 }
 
-
-
-BaseItemContext BaseItemContext::EndDict(){
+Builder::BaseItemContext Builder::BaseItemContext::EndDict(){
     return build.EndDict();
 }
 
 
-KeyItemContext BaseItemContext::Key(std::string_view name){
+Builder::KeyItemContext Builder::BaseItemContext::Key(std::string_view name){
     return build.Key(name);
 } 
 
-ArrayItemContext BaseItemContext::StartArray(){
+Builder::ArrayItemContext Builder::BaseItemContext::StartArray(){
     return build.StartArray();
 }
 
-DictItemContext BaseItemContext::StartDict(){
+Builder::DictItemContext Builder::BaseItemContext::StartDict(){
     return build.StartDict();
 }
 
 
-BaseItemContext BaseItemContext::EndArray(){
+Builder::BaseItemContext Builder::BaseItemContext::EndArray(){
     return build.EndArray();
 }
 
-BaseItemContext BaseItemContext::Value(Node::Value value){
-    return build.Value(value);
+Builder::BaseItemContext Builder::BaseItemContext::Value(Node::Value value){
+    return build.Value(std::move(value));
 }
 
-Node json::BaseItemContext::Build()
+Node json::Builder::BaseItemContext::Build()
 {
     return build.Build();
 }

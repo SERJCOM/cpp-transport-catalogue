@@ -1,6 +1,7 @@
 #include "json_reader.h"
 #include <string>
 #include <set>
+#include "json_builder.h"
 
 
 using namespace ctlg;
@@ -55,16 +56,29 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
     auto stat_requests = doc_.GetRoot().AsDict().at("stat_requests").AsArray();
 
-    json::Array result;
+    json::Builder builder;
 
+    builder.StartArray();
+
+    std::cout << "START" << std::endl;
 
     for(const auto& node : stat_requests){
+
+        std::cout << "for" << std::endl;
+
         if(node.AsDict().at("type").AsString() == "Stop"){
+
+            // std::cout << "if STOP" << std::endl;
+            
             auto node_dict = node.AsDict();
 
             int id = node_dict.at("id").AsInt();
             std::string name = node_dict.at("name").AsString();
-            json::Dict answer;
+            
+            // std::cout << "StartDict" << std::endl;
+            builder.StartDict();
+            
+
             if(request.GetCatalogue()->BusStopExist(name)){
                json::Array buses ;
                const auto& set = request.GetCatalogue()->GetRouteByStop(name);
@@ -74,25 +88,33 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
                 std::sort(buses.begin(), buses.end(), [&](json::Node& node1, json::Node& node2){
                     return node1.AsString() < node2.AsString();
                 });
-                answer["buses"] = std::move(buses);
+
+                // std::cout << "buses" << std::endl;
+                builder.Key("buses").Value(std::move(buses));
             }
             else{
-                answer["error_message"] = json::Node(std::string("not found"));
+                // std::cout << "error_message" << std::endl;
+                builder.Key("error_message").Value("not found");
             }   
-            answer["request_id"] = id;
+            // std::cout << "request_id" << std::endl;
+            builder.Key("request_id").Value(id);
+
             
-            result.push_back(answer);
+            builder.EndDict();
         }
         else if(node.AsDict().at("type").AsString() == "Bus"){
+
+            // std::cout << "if BUS" << std::endl;
+
             auto node_dict = node.AsDict();
             int id = node_dict.at("id").AsInt(); 
             std::string name = node_dict.at("name").AsString();
 
-            json::Dict answer;
+            builder.StartDict();
             
 
             if(request.GetCatalogue()->GetRoute(name) == nullptr){
-                 answer["error_message"] = json::Node(std::string("not found"));
+                builder.Key("error_message").Value("not found");
             }else{
                 
                 int route_length = request.GetRouteLength(name);
@@ -102,31 +124,41 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
                     count = count * 2 - 1;
                 }
                 
-                answer["route_length"] = route_length;
-                answer["curvature"] = (double)route_length / length;
-                answer["unique_stop_count"] = (int)request.GetCatalogue()->GetUniqueStopsForRoute(name);
-                answer["stop_count"] = count;
+                builder.Key("route_length").Value(route_length);
+                builder.Key("curvature").Value((double)route_length / length);
+                builder.Key("unique_stop_count").Value((int)request.GetCatalogue()->GetUniqueStopsForRoute(name));
+                builder.Key("stop_count").Value(count);
+
             }
 
-            answer["request_id"] = id;
-            result.push_back(answer);
+            builder.Key("request_id").Value(id);
+            builder.EndDict();
         }
         else if(node.AsDict().at("type").AsString() == "Map"){
             auto node_dict = node.AsDict();
             int id = node_dict.at("id").AsInt(); 
 
-            json::Dict answer;
 
-            answer["request_id"] = id;
+            builder.StartDict();
+            
+
+            builder.Key("request_id").Value(id);
+
+            std::cout << "request_id" << std::endl;
 
             std::string map = request.RenderMap();
 
-            answer["map"] = map;
+            std::cout << "map" << std::endl;
 
-            result.push_back(answer);
+            builder.Key("map").Value(std::move(map));
+
+            builder.EndDict();
         }
     }
-    json::Print(json::Document(json::Node(result)), output);
+
+    builder.EndArray();
+
+    json::Print(json::Document(std::move(builder.Build())), output);
 }
 
 svg::Color ParsingColor(const json::Node& node){

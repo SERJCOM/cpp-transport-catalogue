@@ -7,13 +7,18 @@
 #include <fstream>
 #include "map_renderer.h"
 #include <algorithm>
+#include "router.h"
+#include <fstream>
 
 using namespace std;
 using namespace ctlg;
-//using namespace detail;
+using namespace graph;
 
 
 void Test1(){
+
+    ifstream file("vivod.txt");
+
     TransportCatalogue tr;
 
     RequestHandler handler(&tr);
@@ -23,12 +28,31 @@ void Test1(){
     MapRenderer map;
 
     handler.SetRenderMap(&map);
-
-    reader.LoadDocument(std::cin);
+    reader.LoadDocument(file);
     reader.ParseData(handler);
+
+    std::cout << "START TEST" << std::endl;
+
     reader.SetMapRenderer(map);
 
+    std::cout << "MAP TEST" << std::endl;
+
+
+    TransportRouter router(tr);
+
+    std::cout << "create TEST" << std::endl;
+
+    router.InitRouter();
+
+    std::cout << "init TEST" << std::endl;
+
+    handler.SetRouter(router);
+
+    std::cout << "set TEST" << std::endl;
+
     reader.PrintInformation(std::cout, handler);
+
+    std::cout << "END TEST" << std::endl;
 
 }
 

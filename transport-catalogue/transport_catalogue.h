@@ -41,6 +41,21 @@ public:
 
     std::vector<const BusRoute*> GetRouteDataBase() const;
 
+    void SetBusVelocity(float velocity){
+        bus_velocity_ = velocity;
+    }
+
+    float GetVelocity() const {
+        return bus_velocity_;
+    }
+
+    void SetWaitTime(int time){
+        bus_wait_time_ = time;
+    }
+
+    int GetWaitTime() const {
+        return bus_wait_time_;
+    }
 
 private:
 
@@ -54,6 +69,11 @@ private:
     std::unordered_map<std::string_view, const BusRoute*> name_busroute_database;
     std::unordered_map<std::string_view, std::unordered_set<std::string_view>> busstop_busroute_database; // остановка - ключ, маршрут - значение
     std::unordered_map<std::pair<const BusStop*, const BusStop*>, int, ctlg::Hash::BusA_BusB> distance_between_stops;
+
+
+    float bus_velocity_;
+    int bus_wait_time_;
+
 };
 
 }

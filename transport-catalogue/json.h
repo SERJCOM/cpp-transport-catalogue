@@ -26,7 +26,6 @@ public:
 class Node final
     : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
 public:
-   /* Реализуйте Node, используя std::variant */
 
    using variant::variant;
     using Value = variant;

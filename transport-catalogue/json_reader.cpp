@@ -2,9 +2,11 @@
 #include <string>
 #include <set>
 #include "json_builder.h"
-
+#include <string_view>
+#include <iostream>
 
 using namespace ctlg;
+using namespace std;
 
 void ctlg::JsonReader::LoadDocument(std::istream &input)
 {
@@ -48,6 +50,15 @@ void ctlg::JsonReader::ParseData(RequestHandler &request)
             }
         }
     }
+
+    auto routing_settings = doc_.GetRoot().AsDict().at("routing_settings").AsDict();
+        
+    int bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
+    float bus_velocity = routing_settings.at("bus_velocity").AsInt();
+
+    request.SetVelocity(bus_velocity);
+    request.SetWaitTime(bus_wait_time);
+        
     
 
 }
@@ -60,22 +71,16 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
     builder.StartArray();
 
-    std::cout << "START" << std::endl;
-
     for(const auto& node : stat_requests){
-
-        std::cout << "for" << std::endl;
 
         if(node.AsDict().at("type").AsString() == "Stop"){
 
-            // std::cout << "if STOP" << std::endl;
             
             auto node_dict = node.AsDict();
 
             int id = node_dict.at("id").AsInt();
             std::string name = node_dict.at("name").AsString();
             
-            // std::cout << "StartDict" << std::endl;
             builder.StartDict();
             
 
@@ -89,14 +94,11 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
                     return node1.AsString() < node2.AsString();
                 });
 
-                // std::cout << "buses" << std::endl;
                 builder.Key("buses").Value(std::move(buses));
             }
             else{
-                // std::cout << "error_message" << std::endl;
                 builder.Key("error_message").Value("not found");
             }   
-            // std::cout << "request_id" << std::endl;
             builder.Key("request_id").Value(id);
 
             
@@ -104,7 +106,6 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
         }
         else if(node.AsDict().at("type").AsString() == "Bus"){
 
-            // std::cout << "if BUS" << std::endl;
 
             auto node_dict = node.AsDict();
             int id = node_dict.at("id").AsInt(); 
@@ -138,21 +139,59 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
             auto node_dict = node.AsDict();
             int id = node_dict.at("id").AsInt(); 
 
-
             builder.StartDict();
-            
 
             builder.Key("request_id").Value(id);
 
-            std::cout << "request_id" << std::endl;
-
             std::string map = request.RenderMap();
-
-            std::cout << "map" << std::endl;
 
             builder.Key("map").Value(std::move(map));
 
             builder.EndDict();
+        }
+        else if(node.AsDict().at("type").AsString() == "Route"){
+
+            auto node_dict = node.AsDict();
+            int id = node_dict.at("id").AsInt();
+
+            string_view from = node_dict.at("from").AsString();
+            string_view to = node_dict.at("to").AsString();
+
+            builder.StartDict();
+
+            float total_time = 0;
+
+            builder.Key("items").StartArray();
+
+            auto routes = request.GetRoute(from, to);
+
+            for(const auto& route : routes){
+                builder.StartDict();
+
+                if(holds_alternative<RouteWait>(route)){
+
+                    builder.Key("stop_name").Value(std::string(std::get<RouteWait>(route).name));
+                    builder.Key("time").Value(std::get<RouteWait>(route).time);
+                    total_time += std::get<RouteWait>(route).time;
+                    builder.Key("type").Value("Wait");
+
+                } else if(holds_alternative<RouteBus>(route)){
+                    builder.Key("bus").Value(std::string(std::get<RouteBus>(route).bus));
+                    builder.Key("span_count").Value(std::get<RouteBus>(route).span_count);
+                    builder.Key("time").Value(std::get<RouteBus>(route).time);
+                    total_time += std::get<RouteBus>(route).time;
+                    builder.Key("type").Value("Bus");
+                }
+
+                builder.EndDict();
+            }
+
+            builder.EndArray();
+
+            builder.Key("total_time").Value(total_time);
+            builder.Key("request_id").Value(id);
+
+
         }
     }
 

@@ -6,14 +6,17 @@
 #include <iostream>
 #include "map_renderer.h"
 #include <cassert>
+#include "transport_router.h"
+#include "graph.h"
+#include "router.h"
 
 namespace ctlg{
 
 
-void GetRouteInfo(std::ostream& out, std::istream& in, const ctlg::TransportCatalogue& ctl);
 
 class RequestHandler{
 public:
+
     RequestHandler() = default;
 
     RequestHandler(TransportCatalogue* catalogue):catalogue_(catalogue){}
@@ -28,8 +31,6 @@ public:
 
     void SetDistance(std::string_view stop1, std::string_view stop2, double distance);
 
-    void AddNewNode(const std::string& str);
-
     int GetRouteLength(std::string_view name) const ;
 
     double GetGeoRouteLength(std::string_view name) const ;
@@ -38,8 +39,15 @@ public:
         map_ = map;
     }
 
+    void SetRouter(TransportRouter& router){
+        router_ = &router;
+    }
+
+
+    std::vector<std::variant<RouteBus, RouteWait>> GetRoute(std::string_view from, std::string_view to) const ;  
+
     std::string RenderMap(){
-        assert(map_ != nullptr);
+        assert(map_);
         std::ostringstream str;
        
         auto routes = catalogue_->GetRouteDataBase();
@@ -59,12 +67,25 @@ public:
     }
 
     TransportCatalogue* GetCatalogue() const ;
+
+    void SetVelocity(float velocity){
+        assert(catalogue_);
+
+        catalogue_->SetBusVelocity(velocity);
+    }
+
+    void SetWaitTime(int time){
+        assert(catalogue_);
+        catalogue_->SetWaitTime(time);
+    }
     
 private:
 
-TransportCatalogue* catalogue_;
+    TransportCatalogue* catalogue_;
 
-MapRenderer* map_;
+    MapRenderer* map_;
+
+    TransportRouter* router_ = nullptr;
 
 };
 

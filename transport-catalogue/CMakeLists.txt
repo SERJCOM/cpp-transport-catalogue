@@ -1,5 +1,10 @@
 project(transport)
 
+
+set(CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD 17)
+
+
 add_executable(transport
  main.cpp 
  transport_catalogue.cpp
@@ -11,5 +16,12 @@ add_executable(transport
  map_renderer.cpp
  json_builder.cpp
  geo.cpp
+ transport_router.cpp
+ )
+
+ target_compile_options(transport
+ PRIVATE
+ -g
+
  )
 

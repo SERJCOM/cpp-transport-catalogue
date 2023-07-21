@@ -3,19 +3,9 @@
 
 using namespace ctlg;
 using namespace graph;
-using namespace std;
 
-ctlg::TransportRouter::TransportRouter(const TransportCatalogue &catalogue)
-{
-    CreateGraph(catalogue);
-}
 
-//TODO//
-/*  
 
-    СЧИТАТЬ ВРЕМЯ ДВИЖЕНИЯ В МИНУТАХ, ТО ЕСТЬ ПЕРЕВЕСТИ СКОРОСТЬ В КМ В МИН,
-
-*/
 
 void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
 {
@@ -23,55 +13,62 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
 
 
     for(auto name : names){
-
-        // std::cout << name << std::endl;
         
         const BusRoute* route = catalogue.GetRoute(name);
 
-        // int i = 0;
 
-        for(auto it = route->buses.begin() + 1; it != route->buses.end(); it++){
-            graph::Edge<int> edge;
+        auto it_final =  route->buses.end();
 
 
-            AddBus((*(it - 1))->name);
-            edge.from = busname_vertexid_[(*(it - 1))->name];
+        for(auto it = route->buses.begin(); it != it_final; it++){
+            for(auto jt = it; jt != it_final; jt++){
+
+                Edge<float> edge;
+
+                if(*it == *jt){
+                    edge.from = AddBus(Wait{(*it)->name});
+                    edge.to = AddBus(Ride{(*jt)->name});
+                }
+                else{
+                    edge.from = AddBus(Ride{(*it)->name});
+                    edge.to = AddBus(Wait{(*jt)->name});
+                }
+
+                
+                edge.span = std::distance(it, jt);
 
 
-            Edge<int> wait;
-            wait.from = edge.from;
-            wait.to = edge.from;
-            wait.weight = catalogue.GetWaitTime();
+                if(it != jt){
+                    float length = 0; 
 
-            size_t wait_index = graph_.AddEdge(wait);
+                    auto it_s = it;
+                   
+                    for(auto it_e = it + 1; it_e <= jt;  it_e++){
 
-            edge_index_[wait] = wait_index;
-            index_edge_[wait_index] = wait;
+                        length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
 
-            
-            AddBus((*it)->name); 
-            edge.to = busname_vertexid_[(*it)->name];
+                        it_s++;
+                    }
 
+                    float velocity = catalogue.GetVelocity() / 60.0 ;
+                    edge.weight = CalculateTime(velocity, length);
+                
+                }   else{
 
-            float length = catalogue.GetDistanceBetweenStops((*(it - 1))->name, (*it)->name);
-            float velocity = catalogue.GetVelocity();
+                    edge.weight = catalogue.GetWaitTime();
+                }
 
+                if(edge_index_.count(edge) == 0){
 
-            edge.weight = CalculateTime(velocity, length);
-            
+                    size_t index = graph_.AddEdge(edge);
+                    edge_index_[edge] = index;
+                    index_edge_[index] = edge;
 
-            size_t index = graph_.AddEdge(edge);
-            edge_index_[edge] = index;
-            index_edge_[index] = edge;
+                    edgeindex_busname_[index] = route->name;
 
-            // std::cout << "5" << std::endl;
+                }
 
-            edgeindex_busname_[index] = route->name;
-
-            // std::cout << "6" << std::endl;
-
-
-            // i++;
+            }
         }
 
     }   
@@ -82,30 +79,47 @@ void ctlg::TransportRouter::InitRouter()
     router_ = std::make_shared<Router>(graph_);
 }
 
-std::vector<std::variant<RouteBus, RouteWait>> ctlg::TransportRouter::FindRoute(std::string_view stop1, std::string_view stop2) const
+
+
+std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRouter::FindRoute(std::string_view stop1, std::string_view stop2) const
 {
-    std::optional<graph::Router<int>::RouteInfo> route = router_->BuildRoute(busname_vertexid_.at(string(stop1)), busname_vertexid_.at(string(stop2)));
+    std::optional<graph::Router<float>::RouteInfo> route = router_->BuildRoute(busname_vertexid_.at(Wait{stop1}), busname_vertexid_.at(Wait{stop2}));
+    
+    
     if(route.has_value()){
 
         std::vector<std::variant<RouteBus, RouteWait>> res;
 
         for(auto range : route->edges){
-            Edge<int> edge = index_edge_.at(range);
+            Edge<float> edge = index_edge_.at(range);
 
             VertexId from = edge.from;
             VertexId to = edge.to;
 
-            if(from == to){
+            std::string_view from_name;
+            std::string_view to_name;
+
+            std::visit([&from_name](auto value){
+                from_name = value.name;
+            }, vertexid_busname_.at(from));
+
+            std::visit([&to_name](auto value){
+                to_name = value.name;
+            }, vertexid_busname_.at(to));
+
+            if(from_name == to_name){
                 RouteWait wait;
-                wait.name = vertexid_busname_.at(from);
+
+                std::visit( [&wait](auto value) { wait.name = value.name; }, vertexid_busname_.at(from));
+
                 wait.time = edge.weight;
 
                 res.push_back(wait);
             } else{
                 RouteBus bus;
 
-                bus.bus = edgeindex_busname_.at(edge_index_.at(edge));
-                bus.span_count = 1;
+                bus.name = edgeindex_busname_.at(edge_index_.at(edge));
+                bus.span_count = edge.span;
                 bus.time = edge.weight;
 
                 res.push_back(bus);
@@ -117,21 +131,25 @@ std::vector<std::variant<RouteBus, RouteWait>> ctlg::TransportRouter::FindRoute(
 
 
     } else{
-        return std::vector<std::variant<RouteBus, RouteWait>>{};
+        return std::nullopt;
     }
 }
 
 
-void ctlg::TransportRouter::AddBus(std::string_view name)
+size_t ctlg::TransportRouter::AddBus(std::variant<Wait, Ride> name)
 {
     if(busname_vertexid_.count(name) == 0){
         size_t index = busname_vertexid_.size();
         busname_vertexid_[name] = index;
         vertexid_busname_[index] = name;
+
+        return index;
     }
+
+    return busname_vertexid_.at(name);
 }
 
 float ctlg::TransportRouter::CalculateTime(float velocity, float length)
 {
-    return length / velocity;   
+    return (length / 1000) / velocity;   
 }

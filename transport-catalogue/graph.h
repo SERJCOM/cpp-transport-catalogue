@@ -18,6 +18,8 @@ struct Edge {
     VertexId to;
     Weight weight;
 
+    int span;
+
     bool operator==(const Edge<Weight>& edge) const {
         return std::tuple{from, to, weight} == std::tuple{edge.from, edge.to, edge.weight};
     }
@@ -41,7 +43,7 @@ public:
 
 private:
     std::vector<Edge<Weight>> edges_;
-    std::unordered_map<size_t, IncidenceList> incidence_lists_;
+    std::vector<IncidenceList> incidence_lists_;
 };
 
 template <typename Weight>
@@ -55,7 +57,7 @@ EdgeId DirectedWeightedGraph<Weight>::AddEdge(const Edge<Weight>& edge) {
 
     const EdgeId id = edges_.size() - 1;
     
-    incidence_lists_[edge.from].push_back(id);
+    incidence_lists_.at(edge.from).push_back(id);
     return id;
 }
 

@@ -57,6 +57,10 @@ public:
         return bus_wait_time_;
     }
 
+    int GetStopCount() const{
+        return stop_count_;
+    }
+
 private:
 
     // Нужно для резервирования места для остановки в БД
@@ -73,6 +77,7 @@ private:
 
     float bus_velocity_;
     int bus_wait_time_;
+    int stop_count_ = 0;
 
 };
 

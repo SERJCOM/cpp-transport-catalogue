@@ -4,22 +4,20 @@
 #include <optional>
 #include <deque>
 
-
-
 namespace json{
 
+class BaseItemContext;
+class DictItemContext;
+class ArrayItemContext;
+class KeyItemContext;
+class ValueItemContext;
+class ValueKeyItemContext;
+
 class Builder{
-private:
-
-    class BaseItemContext;
-    class DictItemContext;
-    class ArrayItemContext;
-    class KeyItemContext;
-
 public:
 
     Builder(){
-        nodes_stack_.push_back(&root_);
+        nodes_stack_.push_back(&root);
     }
 
     KeyItemContext Key(std::string_view name);
@@ -34,76 +32,36 @@ public:
 
     BaseItemContext EndArray();
 
-    Node Build(); 
+    json::Node Build(); 
 
 
 private:
-    
+    bool flag = false;
+
     bool CheckDict(){
-        return nodes_stack_.back()->IsDict();
+        return std::holds_alternative<Dict>(nodes_stack_.back()->GetValue());
     }  
-    
+
     bool CheckArray(){
-        return nodes_stack_.back()->IsArray();
+        return std::holds_alternative<Array>(nodes_stack_.back()->GetValue());
     }
-    
+
     bool CheckNull(){
-        return nodes_stack_.back()->IsNull();
+        return std::holds_alternative<std::nullptr_t>(nodes_stack_.back()->GetValue());
     }
 
-    template<typename T>
-    Builder* BuildDictArray(T element, bool to_stack);
-
-
-    Node root_;
+    Node root;
     std::vector<Node*> nodes_stack_;
-    std::optional<std::string> key_;
-
-    
+    std::optional<std::string> Key_;
 
 };
 
 
-template<typename T>
-Builder* Builder::BuildDictArray(T element, bool write_stack){
-
-    if(CheckArray()){
-        std::get<Array>(nodes_stack_.back()->GetValue()).push_back(std::move(element));
-
-        if(write_stack)
-            nodes_stack_.push_back(&std::get<Array>(nodes_stack_.back()->GetValue()).back());
-    }
-    else if(CheckDict()){
-        if(!key_.has_value()){
-            throw std::logic_error("ошибка со словарем");
-        }   
-
-        if(write_stack){
-            nodes_stack_.back()->GetValue() = std::move(element);
-
-            nodes_stack_.push_back(nodes_stack_.back());
-        }
-        else{
-            std::get<Dict>(nodes_stack_.back()->GetValue())[key_.value()] = std::move(element);
-        }
-    }
-    else if(CheckNull()){
-        nodes_stack_.back()->GetValue() = std::move(element);
-        if(write_stack)
-            nodes_stack_.push_back(nodes_stack_.back());
-    }
-    else{
-        throw std::logic_error("ошибка со словарем");
-    }
-
-    key_.reset();
-
-    return this;
-}
 
 
 
-class Builder::BaseItemContext{
+
+class BaseItemContext{
 public:
     BaseItemContext(Builder& temp): build(temp){}
 
@@ -119,12 +77,14 @@ public:
 
     BaseItemContext Value(Node::Value value);
 
+    //ValueKeyItemContext Value(Node::Value value);
+    
     Node Build();
 
     Builder& build;
 };
 
-class Builder::DictItemContext final: protected Builder::BaseItemContext{
+class DictItemContext final: protected BaseItemContext{
 public:
     DictItemContext(Builder& temp):BaseItemContext(temp){}
 
@@ -135,7 +95,7 @@ public:
 
 
 
-class Builder::ArrayItemContext final: protected Builder::BaseItemContext{
+class ArrayItemContext final: protected BaseItemContext{
 public:
 
     ArrayItemContext(Builder& temp): BaseItemContext(temp){}
@@ -153,7 +113,7 @@ public:
 };
 
 
-class Builder::KeyItemContext final: protected Builder::BaseItemContext{
+class KeyItemContext final: protected BaseItemContext{
 public:
     KeyItemContext(Builder& temp): BaseItemContext(temp){}   
 
@@ -161,9 +121,13 @@ public:
     using BaseItemContext::StartDict;
 
     DictItemContext Value(Node::Value value){
-        build.Value(std::move(value));
+        build.Value(value);
         return DictItemContext(build);
-    }  
+    }
+    
 };
 
 }
+
+
+

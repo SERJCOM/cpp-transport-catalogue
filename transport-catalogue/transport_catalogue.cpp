@@ -10,6 +10,8 @@ void TransportCatalogue::AddBusStop(const BusStop& stop){
         busstop_database.push_back(stop);
         busstop_busroute_database.insert({busstop_database.back().name, {}});
         name_busstop_database[busstop_database.back().name] = &busstop_database.back();
+
+        stop_count_++;
     }else{
         auto it = std::find_if(busstop_database.begin(), busstop_database.end(), [&](const BusStop& i){
             return (i.name == stop.name);
@@ -194,6 +196,8 @@ const BusStop *TransportCatalogue::CreateBusStop(std::string_view name)
         busstop_database.push_back(std::move(stop));
         name_busstop_database[busstop_database.back().name] = &busstop_database.back();
         busstop_busroute_database.insert({busstop_database.back().name, {}});
+
+        stop_count_++;
     }
     //return name_busstop_database.at(busstop_database.back().name);
     return name_busstop_database.at(name);

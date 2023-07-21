@@ -44,7 +44,7 @@ public:
     }
 
 
-    std::vector<std::variant<RouteBus, RouteWait>> GetRoute(std::string_view from, std::string_view to) const ;  
+    std::optional<std::vector<std::variant<RouteBus, RouteWait>>> GetRoute(std::string_view from, std::string_view to) const ;  
 
     std::string RenderMap(){
         assert(map_);

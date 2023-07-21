@@ -3,34 +3,100 @@
 
 using namespace json;
 
-
-Builder::KeyItemContext json::Builder::Key(std::string_view name)
+KeyItemContext json::Builder::Key(std::string_view name)
 {
-    if( !CheckDict() || key_.has_value()){
+    if( !CheckDict() || Key_.has_value()){
         throw std::logic_error("ОШИБКА С КЛЮЧОМ");
     }
 
-    key_ = std::string(name);
+    Key_ = std::string(name);
+
+    // flag = true;
+
 
     return KeyItemContext(*this);
+
 }
 
-Builder::BaseItemContext json::Builder::Value(Node::Value value)
+BaseItemContext json::Builder::Value(Node::Value value)
 {   
-    return BaseItemContext(*BuildDictArray(std::move(value), false));
+    if(CheckArray()){
+        std::get<Array>(nodes_stack_.back()->GetValue()).push_back(value);
+    }
+    else if(CheckDict()){
+        if(!Key_.has_value()){
+            throw std::logic_error("ашипка со словарем");
+        }
+        std::get<Dict>(nodes_stack_.back()->GetValue())[Key_.value()] = value;
+    }
+    else if(CheckNull()) {
+
+        nodes_stack_.back()->GetValue() = std::move(value);
+    }
+    else{
+        throw std::logic_error("ашипка с валью");
+    }
+    flag = true;
+
+    Key_.reset();
+
+    return BaseItemContext(*this);
 }
 
-Builder::DictItemContext json::Builder::StartDict()
+DictItemContext json::Builder::StartDict()
 {
-    return DictItemContext(*BuildDictArray(Dict{}, true));
+    Dict temp;
+    if(CheckArray()){
+        std::get<Array>(nodes_stack_.back()->GetValue()).push_back(temp);
+
+        nodes_stack_.push_back(&std::get<Array>(nodes_stack_.back()->GetValue()).back());
+    }
+    else if(CheckDict()){
+        if(!Key_.has_value()){
+            throw std::logic_error("ошибка со словарем");
+        }   
+        nodes_stack_.back()->GetValue() = std::move(temp);
+        nodes_stack_.push_back(nodes_stack_.back());
+    }
+    else if(CheckNull()){
+        nodes_stack_.back()->GetValue() = std::move(temp);
+        nodes_stack_.push_back(nodes_stack_.back());
+    }
+    else{
+        throw std::logic_error("ошибка со словарем");
+    }
+    flag = true;
+     Key_.reset();
+
+    return DictItemContext(*this);
 }
 
-Builder::ArrayItemContext json::Builder::StartArray()
-{
-    return ArrayItemContext(*BuildDictArray(Array{}, true));
+ArrayItemContext json::Builder::StartArray(){
+    Array temp;
+    if(Key_.has_value() && CheckDict()){
+        std::get<Dict>(nodes_stack_.back()->GetValue())[Key_.value()] = temp;
+        nodes_stack_.push_back(&std::get<Dict>(nodes_stack_.back()->GetValue()).at(Key_.value()));
+    }
+    else if(CheckArray()){
+        
+        std::get<Array>(nodes_stack_.back()->GetValue()).push_back(temp);
+        nodes_stack_.push_back(nodes_stack_.back());
+    }
+    else if(CheckNull()){
+        nodes_stack_.back()->GetValue() = std::move(temp);
+        nodes_stack_.push_back(nodes_stack_.back());
+    }
+    else{
+        throw std::logic_error("ошибка с массивом");
+    }
+    
+    flag = true;
+    Key_.reset();
+
+    return ArrayItemContext(*this);
 }
 
-Builder::BaseItemContext json::Builder::EndDict(){
+BaseItemContext json::Builder::EndDict(){
     if( !CheckDict()){
         throw std::logic_error("ОШИБКА В КОНЦЕ СЛОВАРЯ");
     }
@@ -38,8 +104,7 @@ Builder::BaseItemContext json::Builder::EndDict(){
     return BaseItemContext(*this);
 }
 
-
-Builder::BaseItemContext json::Builder::EndArray(){
+BaseItemContext json::Builder::EndArray(){
     if( !CheckArray()){
         throw std::logic_error("ОШИБКА В КОНЦЕ МАССИВА");
     }
@@ -49,42 +114,42 @@ Builder::BaseItemContext json::Builder::EndArray(){
 
 json::Node json::Builder::Build()
 {   
-    if(nodes_stack_.size() != 1 || root_.IsNull() ) {
+    if(nodes_stack_.size() != 1 || !flag ) {
         throw std::logic_error("JSON недостроен");
     }
 
     nodes_stack_.pop_back();
 
-    return root_;
+    return root;
 }
 
-Builder::BaseItemContext Builder::BaseItemContext::EndDict(){
+BaseItemContext BaseItemContext::EndDict(){
     return build.EndDict();
 }
 
 
-Builder::KeyItemContext Builder::BaseItemContext::Key(std::string_view name){
+KeyItemContext BaseItemContext::Key(std::string_view name){
     return build.Key(name);
 } 
 
-Builder::ArrayItemContext Builder::BaseItemContext::StartArray(){
+ArrayItemContext BaseItemContext::StartArray(){
     return build.StartArray();
 }
 
-Builder::DictItemContext Builder::BaseItemContext::StartDict(){
+DictItemContext BaseItemContext::StartDict(){
     return build.StartDict();
 }
 
 
-Builder::BaseItemContext Builder::BaseItemContext::EndArray(){
+BaseItemContext BaseItemContext::EndArray(){
     return build.EndArray();
 }
 
-Builder::BaseItemContext Builder::BaseItemContext::Value(Node::Value value){
-    return build.Value(std::move(value));
+BaseItemContext BaseItemContext::Value(Node::Value value){
+    return build.Value(value);
 }
 
-Node json::Builder::BaseItemContext::Build()
+Node json::BaseItemContext::Build()
 {
     return build.Build();
 }

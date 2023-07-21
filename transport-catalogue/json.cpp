@@ -352,27 +352,44 @@ Document Load(std::istream& input) {
     return Document{LoadNode(input)};
 }
 
-void PrintValue(bool value,  std::ostream& out){
+void PrintValue(bool value,  std::ostream& out, int offset ){
+
+    out << std::string(offset, ' ') ;
+
+    
     if(value){
         out << "true";
     }
     else{
         out << "false";
     }
+   
 }
 
-void PrintValue(const Dict& value, std::ostream& out);
+void PrintValue(const Dict& value, std::ostream& out, int offset );
 
-void PrintValue(int value,  std::ostream& out){
+void PrintValue(int value,  std::ostream& out, int offset ){
+    out << std::string(offset, ' ') ;
+
     out << value;
+
+   
 }
 
-void PrintValue(double value,  std::ostream& out){
+void PrintValue(double value,  std::ostream& out, int offset ){
+
+    out << std::string(offset, ' ');
+
     out << value;
+
+    
 }
 
-void PrintValue(const std::string& value,  std::ostream& out){
-    out << "\"";  
+void PrintValue(const std::string& value,  std::ostream& out, int offset ){
+    
+    out << std::string(offset, ' ') ;
+    
+    out  << "\"";  
     
     std::string copy = value;
 
@@ -394,49 +411,56 @@ void PrintValue(const std::string& value,  std::ostream& out){
     }
     
     out << "\"";
+   
 }
 
-void PrintValue(std::nullptr_t,  std::ostream& out){
-    out << "null";
+void PrintValue(std::nullptr_t,  std::ostream& out, int offset ){
+    out << std::string(offset, ' ') << "null";
+   
 }
 
-void PrintValue(const Array& value,  std::ostream& out){
-    out << "[ ";
+void PrintValue(const Array& value,  std::ostream& out, int offset ){
+    out << std::string(offset, ' ') << "[\n";
+
+    
+
     for(size_t i = 0; i < value.size(); i++){
-        std::visit([&out](const auto& value){
-        PrintValue(value, out);
+        // out << std::string(offset, ' ') ;
+        std::visit([&out, offset](const auto& value){
+        PrintValue(value, out, offset + 4);
         }, value[i].GetValue());
 
         if(i != value.size() - 1){
-            out << ", ";
+            out << "," << '\n';
         }
     }
-    out << " ]";
+    out << '\n' << std::string(offset, ' ') << "]";
 }
 
 
-void PrintValue(const Dict& value, std::ostream& out){
-    out << "{ ";
+void PrintValue(const Dict& value, std::ostream& out, int offset ){
+    out <<  std::string(offset, ' ') << "{\n";
     for(auto i = value.begin(); i != value.end(); i++){
 
         if(i != value.begin()){
-            out << ", ";
+            out << ", \n";
         }
 
-        out << "\"" << i->first << "\": ";
-        std::visit([&out](const auto& value){
-        PrintValue(value, out);
+        out << std::string(offset + 4, ' ');
+        out  << "\"" << i->first << "\": ";
+        std::visit([&out, offset](const auto& value){
+        PrintValue(value, out, offset + 4);
         }, i->second.GetValue());
 
     }
-    out << " }";
+    out << '\n' << std::string(offset, ' ') << "}";
 }
 
 
 void Print(const Document& doc, std::ostream& output) {
     auto node = doc.GetRoot();
     std::visit([&output](const auto& value){
-        PrintValue(value, output);
+        PrintValue(value, output, 0);
     }, node.GetValue());
 }
 

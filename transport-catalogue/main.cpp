@@ -31,28 +31,17 @@ void Test1(){
     reader.LoadDocument(file);
     reader.ParseData(handler);
 
-    std::cout << "START TEST" << std::endl;
-
     reader.SetMapRenderer(map);
-
-    std::cout << "MAP TEST" << std::endl;
 
 
     TransportRouter router(tr);
 
-    std::cout << "create TEST" << std::endl;
-
     router.InitRouter();
-
-    std::cout << "init TEST" << std::endl;
 
     handler.SetRouter(router);
 
-    std::cout << "set TEST" << std::endl;
-
     reader.PrintInformation(std::cout, handler);
 
-    std::cout << "END TEST" << std::endl;
 
 }
 

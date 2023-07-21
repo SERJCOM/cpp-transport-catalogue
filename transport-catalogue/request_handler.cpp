@@ -47,38 +47,10 @@ double ctlg::RequestHandler::GetGeoRouteLength(std::string_view name) const
     
 }
 
-std::vector<std::variant<RouteBus, RouteWait>> ctlg::RequestHandler::GetRoute(std::string_view from, std::string_view to) const
+std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::RequestHandler::GetRoute(std::string_view from, std::string_view to) const
 {
-    std::vector<std::variant<RouteBus, RouteWait>> temp = router_->FindRoute(from, to);
+    return  router_->FindRoute(from, to);
 
-    std::vector<std::variant<RouteBus, RouteWait>> res;
-
-    auto it = temp.begin(); 
-
-    while(it != temp.end()){
-
-        if(std::holds_alternative<RouteWait>(*it)){
-            res.push_back(std::get<RouteWait>(*it));
-            it++;
-        } 
-
-        else{
-            auto temp_it = std::adjacent_find(it, temp.end(), [&](const auto& elem1, const auto& elem2){
-                return std::holds_alternative<RouteBus>(elem1) && std::holds_alternative<RouteBus>(elem2);
-            });
-
-            RouteBus bus = std::get<RouteBus>(*it);
-            bus.span_count = std::distance(temp_it, it) - 1;
-            res.push_back(bus);
-            it = temp_it;
-        }
-
-        
-
-    }
-
-
-    return res;
 }
 
 TransportCatalogue *ctlg::RequestHandler::GetCatalogue() const

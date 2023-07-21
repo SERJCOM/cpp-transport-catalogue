@@ -63,7 +63,9 @@ void ctlg::JsonReader::ParseData(RequestHandler &request)
 
 }
 
+
 void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &request){
+
 
     auto stat_requests = doc_.GetRoot().AsDict().at("stat_requests").AsArray();
 
@@ -161,12 +163,19 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
             float total_time = 0;
 
-            builder.Key("items").StartArray();
 
             auto routes = request.GetRoute(from, to);
 
-            for(const auto& route : routes){
+            if(routes.has_value()){
+
+            builder.Key("items").StartArray();
+
+
+            for(const auto& route : routes.value()){
+
+
                 builder.StartDict();
+                
 
                 if(holds_alternative<RouteWait>(route)){
 
@@ -176,7 +185,7 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
                     builder.Key("type").Value("Wait");
 
                 } else if(holds_alternative<RouteBus>(route)){
-                    builder.Key("bus").Value(std::string(std::get<RouteBus>(route).bus));
+                    builder.Key("bus").Value(std::string(std::get<RouteBus>(route).name));
                     builder.Key("span_count").Value(std::get<RouteBus>(route).span_count);
                     builder.Key("time").Value(std::get<RouteBus>(route).time);
                     total_time += std::get<RouteBus>(route).time;
@@ -188,10 +197,18 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
             builder.EndArray();
 
-            builder.Key("total_time").Value(total_time);
+            builder.Key("total_time");
+            builder.Value(total_time);
+
+            }
+            else{
+                builder.Key("error_message").Value("not found");
+            }
+            
+            
             builder.Key("request_id").Value(id);
 
-
+            builder.EndDict();
         }
     }
 

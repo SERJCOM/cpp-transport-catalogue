@@ -179,16 +179,21 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
                 if(holds_alternative<RouteWait>(route)){
 
-                    builder.Key("stop_name").Value(std::string(std::get<RouteWait>(route).name));
-                    builder.Key("time").Value(std::get<RouteWait>(route).time);
-                    total_time += std::get<RouteWait>(route).time;
+                    RouteWait wait = std::get<RouteWait>(route);
+
+                    builder.Key("stop_name").Value(std::string(wait.name));
+                    builder.Key("time").Value(wait.time);
+                    total_time += wait.time;
                     builder.Key("type").Value("Wait");
 
                 } else if(holds_alternative<RouteBus>(route)){
-                    builder.Key("bus").Value(std::string(std::get<RouteBus>(route).name));
-                    builder.Key("span_count").Value(std::get<RouteBus>(route).span_count);
-                    builder.Key("time").Value(std::get<RouteBus>(route).time);
-                    total_time += std::get<RouteBus>(route).time;
+
+                    RouteBus bus = std::get<RouteBus>(route);
+
+                    builder.Key("bus").Value(std::string(bus.name));
+                    builder.Key("span_count").Value(bus.span_count);
+                    builder.Key("time").Value(bus.time);
+                    total_time += bus.time;
                     builder.Key("type").Value("Bus");
                 }
 

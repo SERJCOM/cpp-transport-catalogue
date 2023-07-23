@@ -10,14 +10,20 @@
 #include "router.h"
 #include <fstream>
 
+#define LOG
+
+#include "log_duration.h"
+
 using namespace std;
 using namespace ctlg;
 using namespace graph;
 
 
+
 void Test1(){
 
     ifstream file("vivod.txt");
+
 
     TransportCatalogue tr;
 
@@ -29,24 +35,40 @@ void Test1(){
 
     handler.SetRenderMap(&map);
     reader.LoadDocument(file);
-    reader.ParseData(handler);
+
+    {
+        LOG_DURATION("ParseData");
+
+        reader.ParseData(handler);
+    }
 
     reader.SetMapRenderer(map);
 
-
+    LogDuration log_route("TransportRouter create");
     TransportRouter router(tr);
+    log_route.Print();
 
-    router.InitRouter();
+    {
+        LOG_DURATION("router init");
+        router.InitRouter();
+    }
+    
 
     handler.SetRouter(router);
 
-    reader.PrintInformation(std::cout, handler);
 
+    {
+        LOG_DURATION("PrintInformation");
+        reader.PrintInformation(std::cout, handler);
+    }
+
+    
 
 }
 
 int main(){
 
     Test1();
-   
+
+
 }

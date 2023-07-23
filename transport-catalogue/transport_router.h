@@ -16,6 +16,7 @@ namespace ctlg{
 
 using Graph = graph::DirectedWeightedGraph<float>;
 using Router = graph::Router<float>;
+using VertexOpt = std::optional<graph::VertexId>;
 
 struct EdgeHash{
 
@@ -100,7 +101,8 @@ public:
 
 private:
 
-    size_t AddBus(std::variant<Wait, Ride> name);
+    size_t AddBusWait(std::string_view name);
+    size_t AddBusRide(std::string_view name);
 
     static float CalculateTime(float velocity, float length);
 
@@ -108,13 +110,17 @@ Graph graph_;
 
 std::shared_ptr<Router> router_;
 
-std::unordered_map<std::variant<Wait, Ride>, graph::VertexId, WaitRideHash> busname_vertexid_;
-std::unordered_map<graph::VertexId, std::variant<Wait, Ride>> vertexid_busname_;
+std::unordered_map<std::string_view, std::pair<VertexOpt, VertexOpt>> stopname_vertexid_;  // wait, ride
+std::unordered_map<graph::VertexId, std::string_view> vertexidwait_stopname_;
+std::unordered_map<graph::VertexId, std::string_view> vertexidride_stopname_;
 
 std::unordered_map<graph::Edge<float>, graph::EdgeId, EdgeHash> edge_index_;
-std::unordered_map<graph::EdgeId, graph::Edge<float>> index_edge_;
+// std::unordered_map<graph::EdgeId, graph::Edge<float>> index_edge_;
 
 std::unordered_map<graph::EdgeId, std::string_view> edgeindex_busname_;
+
+
+size_t current_index = 0;
 
 };
 

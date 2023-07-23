@@ -49,6 +49,7 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
             for(auto jt = it; jt != route->buses.end(); jt++){
 
                 Edge<float> edge;
+                Edge<float> straight;
 
                 if(it == jt){
                     edge.from = AddBusWait((*it)->name);
@@ -59,31 +60,66 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                     edge.to = AddBusWait((*jt)->name);
                 }
 
-                edge.span = std::distance(it, jt);
+                if(route->type == BusRoute::Type::STRAIGHT){
+                    if(it == jt){
+                        straight.from = AddBusWait((*jt)->name);
+                        straight.to = AddBusRide((*it)->name);
+                    }
+                    else{
+                        straight.from = AddBusRide((*jt)->name);
+                        straight.to = AddBusWait((*it)->name);
+                    }
+                }
+
+                edge.span =  std::distance(it, jt);
 
                 if(it != jt){
                     float length = 0;
-                        auto it_s = it;
-                        for(auto it_e = it + 1; it_e <= jt;  it_e++){
 
-                            length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
-                            it_s++;
-                        }
-                    
+                    auto it_s = it;
+                    for(auto it_e = it + 1; it_e <= jt;  it_e++){
+
+                        length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
+                        it_s++;
+                    }
 
                     float velocity = catalogue.GetVelocity() / 60.0 ;
                     edge.weight = CalculateTime(velocity, length);
+
+                     if(route->type == BusRoute::Type::STRAIGHT){
+                        length = 0;
+
+                        auto it_s = jt;
+                        for(auto it_e = jt - 1; it_e >= it;  it_e--){
+
+                            length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
+                            it_s--;
+                        }
+
+                        straight.weight = CalculateTime(velocity, length);
+
+                     }
                 
-                }   else{
+                }   
+                else{
                     edge.weight = catalogue.GetWaitTime();
+                    straight.weight = catalogue.GetWaitTime();
                 }
 
-                    if(edge_index_.count(edge) == 0){
+                if(edge_index_.count(edge) == 0){
                     size_t index = graph_.AddEdge(edge);
                     edge_index_[edge] = index;
-                    // index_edge_[index] = edge;
 
                     edgeindex_busname_[index] = route->name;
+
+                    if(route->type == BusRoute::Type::STRAIGHT){
+                        
+                        size_t index = graph_.AddEdge(straight);
+                        edge_index_[straight] = index;
+
+                        edgeindex_busname_[index] = route->name;
+
+                    }
                 }
             }
         }

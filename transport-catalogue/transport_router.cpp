@@ -46,12 +46,30 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
             }
         }
 
+        
+            for(auto it = route->buses.begin(); it != route->buses.end(); it++){
+                Edge edge;
+
+                std::string_view name = (*it)->name;
+
+                edge.from = GetStopWait(name);
+                edge.to = GetStopRide(name);
+                edge.weight = wait;    
+
+                FillGraph(edge);
+            }
+
+        if(name == "4"){
+            int a = 5;
+            a++;
+        }
+
 
         for(auto it = route->buses.begin(); it != route->buses.end(); it++){
             int span = 0;
 
             std::string_view it_name = (*it)->name;
-            for(auto jt = it; jt != route->buses.end(); jt++){
+            for(auto jt = it + 1; jt != route->buses.end(); jt++){
                 std::string_view jt_name = (*jt)->name;
 
                 Edge edge;
@@ -59,7 +77,6 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                 edge.span = span;
                 span++;
 
-                if(*it != *jt){
                     edge.from = GetStopRide(it_name);
                     edge.to = GetStopWait(jt_name);
 
@@ -70,24 +87,17 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                         it_s++;
                     }
                     edge.weight = CalculateTime(velocity, length);
-                }
-
-                else{
-                    edge.from = GetStopWait(it_name);
-                    edge.to = GetStopRide(jt_name);
-
-                    edge.weight = wait;                    
-                }
+               
                 edge.bus = name;
 
                 FillGraph(edge);
             }
         }
         if(route->type == BusRoute::Type::STRAIGHT){
-        for(auto it = route->buses.rbegin() + 1; it >= route->buses.rend(); it++){
+        for(auto it = route->buses.rbegin() ; it != route->buses.rend() ; it++){
             std::string_view it_name = (*it)->name;
             int span = 0; 
-                for(auto jt = it ; jt >= route->buses.rend(); jt++){
+                for(auto jt = it + 1; jt != route->buses.rend(); jt++){
                     std::string_view jt_name = (*jt)->name;
 
                     Edge edge;
@@ -95,25 +105,17 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                     edge.span = span;
                     span++;
 
-                    if(*it != *jt){
-                        edge.from = GetStopRide(it_name);
-                        edge.to = GetStopWait(jt_name);
+                    edge.from = GetStopRide(it_name);
+                    edge.to = GetStopWait(jt_name);
 
-                        float length = 0;
-                        auto it_s = it;
-                        for(auto it_e = it + 1; it_e <= jt;  it_e++){
-                            length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
-                            it_s++;
-                        }
-                        edge.weight = CalculateTime(velocity, length);
+                    float length = 0;
+                    auto it_s = it;
+                    for(auto it_e = it + 1; it_e <= jt;  it_e++){
+                        length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
+                        it_s++;
                     }
-
-                    else{
-                        edge.from = GetStopWait(it_name);
-                        edge.to = GetStopRide(jt_name);
-
-                        edge.weight = wait;                    
-                    }
+                    edge.weight = CalculateTime(velocity, length);
+                    
                     edge.bus = name;
 
                     FillGraph(edge);

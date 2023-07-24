@@ -22,7 +22,7 @@ struct EdgeHash{
 
     size_t operator()(const graph::Edge<float>& edge) const {
 
-        return edge.from * std::pow(37, 2) + edge.to ;
+        return  std::hash<int>{}(edge.from) * std::pow(37, 2) + std::hash<int>{}(edge.to) ;
     }
 };
 
@@ -66,12 +66,12 @@ private:
     static float CalculateTime(float velocity, float length);
 
 
-    void FillGraph(Edge edge){
-        if(edge_index_.find(edge) == edge_index_.end()){
-            edge.index = graph_.GetEdgeCount();
+    void FillGraph(const Edge& edge){
+        // if(edge_index_.find(edge) == edge_index_.end()){
+            // edge.index = graph_.GetEdgeCount();
             size_t index = graph_.AddEdge(edge);
             edge_index_[edge] = index;
-        }
+        // }
     }
 
 Graph graph_;

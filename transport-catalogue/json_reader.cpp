@@ -138,6 +138,7 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
             builder.EndDict();
         }
         else if(node.AsDict().at("type").AsString() == "Map"){
+            
             auto node_dict = node.AsDict();
             int id = node_dict.at("id").AsInt(); 
 
@@ -163,20 +164,16 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
             float total_time = 0;
 
-
             auto routes = request.GetRoute(from, to);
 
             if(routes.has_value()){
 
             builder.Key("items").StartArray();
 
-
             for(const auto& route : routes.value()){
-
 
                 builder.StartDict();
                 
-
                 if(holds_alternative<RouteWait>(route)){
 
                     RouteWait wait = std::get<RouteWait>(route);

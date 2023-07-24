@@ -62,6 +62,10 @@ public:
         return stop_count_;
     }
 
+    int GetBusCount() const {
+        return busroute_database.size();
+    }
+
 private:
 
     // Нужно для резервирования места для остановки в БД
@@ -79,6 +83,7 @@ private:
     float bus_velocity_;
     int bus_wait_time_;
     int stop_count_ = 0;
+    int bus_count_ = 0;
 
 };
 

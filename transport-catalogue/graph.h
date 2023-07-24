@@ -20,6 +20,10 @@ struct Edge {
 
     int span;
 
+    size_t index;
+
+    std::string_view bus;
+
     bool operator==(const Edge<Weight>& edge) const {
         return std::tuple{from, to, weight} == std::tuple{edge.from, edge.to, edge.weight};
     }

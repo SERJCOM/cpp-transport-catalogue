@@ -9,135 +9,135 @@ using namespace graph;
 
 
 
-size_t ctlg::TransportRouter::AddBusWait(std::string_view name)
-{
-   
-    if(stopname_vertexid_.find(name) == stopname_vertexid_.end() || !stopname_vertexid_.at(name).first.has_value()){
-        stopname_vertexid_[name].first = current_index;
-        vertexidwait_stopname_[current_index] = name;
-        current_index++;
-    } 
-
+inline size_t ctlg::TransportRouter::GetStopWait(std::string_view name)
+{ 
 
     return stopname_vertexid_.at(name).first.value();
-
 }
 
-size_t ctlg::TransportRouter::AddBusRide(std::string_view name)
+inline size_t ctlg::TransportRouter::GetStopRide(std::string_view name)
 {
-    if(stopname_vertexid_.find(name) == stopname_vertexid_.end() || !stopname_vertexid_.at(name).second.has_value()){
-        stopname_vertexid_[name].second = current_index;
-        vertexidride_stopname_[current_index] = name;
-        current_index++;
-    } 
 
     return stopname_vertexid_.at(name).second.value();
-
 }
 
 void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
 {
-    auto names = catalogue.GetRouteNames();
 
+    float velocity = catalogue.GetVelocity() / 60.0 ;
+    float wait = catalogue.GetWaitTime();
 
-    for(auto name : names){
+    for(auto name : catalogue.GetRouteNames()){
         
         const BusRoute* route = catalogue.GetRoute(name);
-        
 
         for(auto it = route->buses.begin(); it != route->buses.end(); it++){
+            
+            std::string_view name = (*it)->name;
+
+            if(stopname_vertexid_.find(name) == stopname_vertexid_.end()){
+
+                size_t index_f = current_index++;
+                size_t index_s = current_index++;
+                
+                stopname_vertexid_[name] = {index_f, index_s};
+                vertexidride_stopname_[index_s] = name;
+                vertexidwait_stopname_[index_f] = name;
+            }
+        }
+
+
+        for(auto it = route->buses.begin(); it != route->buses.end(); it++){
+            int span = 0;
+
+            std::string_view it_name = (*it)->name;
             for(auto jt = it; jt != route->buses.end(); jt++){
+                std::string_view jt_name = (*jt)->name;
 
-                Edge<float> edge;
-                Edge<float> straight;
+                Edge edge;
 
-                if(it == jt){
-                    edge.from = AddBusWait((*it)->name);
-                    edge.to = AddBusRide((*jt)->name);
-                }
-                else{
-                    edge.from = AddBusRide((*it)->name);
-                    edge.to = AddBusWait((*jt)->name);
-                }
+                edge.span = span;
+                span++;
 
-                if(route->type == BusRoute::Type::STRAIGHT){
-                    if(it == jt){
-                        straight.from = AddBusWait((*jt)->name);
-                        straight.to = AddBusRide((*it)->name);
-                    }
-                    else{
-                        straight.from = AddBusRide((*jt)->name);
-                        straight.to = AddBusWait((*it)->name);
-                    }
-                }
+                if(*it != *jt){
+                    edge.from = GetStopRide(it_name);
+                    edge.to = GetStopWait(jt_name);
 
-                edge.span =  std::distance(it, jt);
-
-                if(it != jt){
                     float length = 0;
-
                     auto it_s = it;
                     for(auto it_e = it + 1; it_e <= jt;  it_e++){
-
                         length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
                         it_s++;
                     }
-
-                    float velocity = catalogue.GetVelocity() / 60.0 ;
                     edge.weight = CalculateTime(velocity, length);
+                }
 
-                     if(route->type == BusRoute::Type::STRAIGHT){
-                        length = 0;
-
-                        auto it_s = jt;
-                        for(auto it_e = jt - 1; it_e >= it;  it_e--){
-
-                            length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
-                            it_s--;
-                        }
-
-                        straight.weight = CalculateTime(velocity, length);
-
-                     }
-                
-                }   
                 else{
-                    edge.weight = catalogue.GetWaitTime();
-                    straight.weight = catalogue.GetWaitTime();
+                    edge.from = GetStopWait(it_name);
+                    edge.to = GetStopRide(jt_name);
+
+                    edge.weight = wait;                    
                 }
+                edge.bus = name;
 
-                if(edge_index_.count(edge) == 0){
-                    size_t index = graph_.AddEdge(edge);
-                    edge_index_[edge] = index;
-
-                    edgeindex_busname_[index] = route->name;
-
-                    if(route->type == BusRoute::Type::STRAIGHT){
-                        
-                        size_t index = graph_.AddEdge(straight);
-                        edge_index_[straight] = index;
-
-                        edgeindex_busname_[index] = route->name;
-
-                    }
-                }
+                FillGraph(edge);
             }
         }
+        if(route->type == BusRoute::Type::STRAIGHT){
+        for(auto it = route->buses.rbegin() + 1; it >= route->buses.rend(); it++){
+            std::string_view it_name = (*it)->name;
+            int span = 0; 
+                for(auto jt = it ; jt >= route->buses.rend(); jt++){
+                    std::string_view jt_name = (*jt)->name;
+
+                    Edge edge;
+
+                    edge.span = span;
+                    span++;
+
+                    if(*it != *jt){
+                        edge.from = GetStopRide(it_name);
+                        edge.to = GetStopWait(jt_name);
+
+                        float length = 0;
+                        auto it_s = it;
+                        for(auto it_e = it + 1; it_e <= jt;  it_e++){
+                            length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
+                            it_s++;
+                        }
+                        edge.weight = CalculateTime(velocity, length);
+                    }
+
+                    else{
+                        edge.from = GetStopWait(it_name);
+                        edge.to = GetStopRide(jt_name);
+
+                        edge.weight = wait;                    
+                    }
+                    edge.bus = name;
+
+                    FillGraph(edge);
+
+                }
+
+            }
+
+        }
+
 
     }   
 }
 
 void ctlg::TransportRouter::InitRouter()
 {
-    router_ = std::make_shared<Router>(graph_);
+    router_ = std::make_shared<Router>(std::ref(graph_));
 }
-
 
 
 std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRouter::FindRoute(std::string_view stop1, std::string_view stop2) const
 {
 
-    if(stopname_vertexid_.count(stop1) == 0 || stopname_vertexid_.count(stop2) == 0){
+    if(stopname_vertexid_.find(stop1) == stopname_vertexid_.end() || stopname_vertexid_.find(stop2) == stopname_vertexid_.end()){
         return std::nullopt;
     }
     
@@ -152,14 +152,14 @@ std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRou
 
         for(auto range : route->edges){
             // Edge<float> edge = index_edge_.at(range);
-            Edge<float> edge = graph_.GetEdge(range);
+            Edge edge = graph_.GetEdge(range);
 
             VertexId from = edge.from;
             VertexId to = edge.to;
 
 
             auto find_name = [&](VertexId id){
-                if(vertexidwait_stopname_.count(id) != 0){
+                if(vertexidwait_stopname_.find(id) != vertexidwait_stopname_.end()){
                     return vertexidwait_stopname_.at(id);
                 }
                 return vertexidride_stopname_.at(id);
@@ -176,7 +176,7 @@ std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRou
             } else{
                 RouteBus bus;
 
-                bus.name = edgeindex_busname_.at(edge_index_.at(edge));
+                bus.name = edge.bus;
                 bus.span_count = edge.span;
                 bus.time = edge.weight;
                 res.push_back(bus);

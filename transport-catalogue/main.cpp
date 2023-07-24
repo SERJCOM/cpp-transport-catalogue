@@ -62,6 +62,12 @@ void Test1(){
         reader.PrintInformation(std::cout, handler);
     }
 
+    // ofstream svg("test.svg");
+
+
+
+    // svg << handler.RenderMap() << endl;
+
     
 
 }

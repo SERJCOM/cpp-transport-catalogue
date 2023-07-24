@@ -22,12 +22,7 @@ struct EdgeHash{
 
     size_t operator()(const graph::Edge<float>& edge) const {
 
-        size_t hash1 = std::hash<size_t>{}(edge.from)  ;
-        size_t hash2 =  std::hash<size_t>{}(edge.to)  ;
-        size_t hash3 = std::hash<float>{}(edge.weight) ;
-        
-
-        return hash1 * std::pow(37, 2) + hash2  * std::pow(37, 1) + hash3 * std::pow(37, 3) ;
+        return edge.from * std::pow(37, 2) + edge.to ;
     }
 };
 
@@ -44,48 +39,12 @@ struct RouteBus{
 };
 
 
-struct Wait{
-    std::string_view name;
-
-
-    bool operator==(const Wait& wait) const{
-        return name == wait.name;
-    }
-};
-
-struct Ride{
-    std::string_view name;
-
-
-    bool operator==(const Ride& wait) const{
-        return name == wait.name;
-    }
-};
-
-struct WaitRideHash{
-
-    size_t operator()(const std::variant<Wait, Ride>& var) const{
-        std::string name;
-
-        std::visit([&name](auto value){
-            name = std::string(value.name);
-        }, var);
-
-        size_t salt = 37;
-
-        if(std::holds_alternative<Wait>(var)){
-            salt = 37 * 37;
-        }
-
-
-        return std::hash<std::string>{}(name) * salt;
-    }
-
-};
 
 
 class TransportRouter{
 public:
+
+    using Edge = graph::Edge<float>;
 
     // explicit TransportRouter(){}
 
@@ -101,10 +60,19 @@ public:
 
 private:
 
-    size_t AddBusWait(std::string_view name);
-    size_t AddBusRide(std::string_view name);
+    size_t GetStopWait(std::string_view name);
+    size_t GetStopRide(std::string_view name);
 
     static float CalculateTime(float velocity, float length);
+
+
+    void FillGraph(Edge edge){
+        if(edge_index_.find(edge) == edge_index_.end()){
+            edge.index = graph_.GetEdgeCount();
+            size_t index = graph_.AddEdge(edge);
+            edge_index_[edge] = index;
+        }
+    }
 
 Graph graph_;
 
@@ -115,10 +83,8 @@ std::unordered_map<graph::VertexId, std::string_view> vertexidwait_stopname_;
 std::unordered_map<graph::VertexId, std::string_view> vertexidride_stopname_;
 
 std::unordered_map<graph::Edge<float>, graph::EdgeId, EdgeHash> edge_index_;
-// std::unordered_map<graph::EdgeId, graph::Edge<float>> index_edge_;
 
 std::unordered_map<graph::EdgeId, std::string_view> edgeindex_busname_;
-
 
 size_t current_index = 0;
 

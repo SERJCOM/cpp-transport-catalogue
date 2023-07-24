@@ -56,13 +56,15 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                 edge.to = GetStopRide(name);
                 edge.weight = wait;    
 
+                edge.IsStop = true;
+
                 FillGraph(edge);
             }
 
-        if(name == "4"){
-            int a = 5;
-            a++;
-        }
+        // if(name == "4"){
+        //     int a = 5;
+        //     a++;
+        // }
 
 
         for(auto it = route->buses.begin(); it != route->buses.end(); it++){
@@ -160,17 +162,20 @@ std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRou
             VertexId to = edge.to;
 
 
-            auto find_name = [&](VertexId id){
-                if(vertexidwait_stopname_.find(id) != vertexidwait_stopname_.end()){
-                    return vertexidwait_stopname_.at(id);
-                }
-                return vertexidride_stopname_.at(id);
-            };
+            
 
-            std::string_view from_name = find_name(from);
-            std::string_view to_name = find_name(to);
+           
+            
 
-            if(from_name == to_name){
+            if(edge.IsStop){
+                auto find_name = [&](VertexId id){
+                    if(vertexidwait_stopname_.find(id) != vertexidwait_stopname_.end()){
+                        return vertexidwait_stopname_.at(id);
+                    }
+                    return vertexidride_stopname_.at(id);
+                };
+                 std::string_view from_name = find_name(from);
+
                 RouteWait wait;
                 wait.name = from_name;
                 wait.time = edge.weight;

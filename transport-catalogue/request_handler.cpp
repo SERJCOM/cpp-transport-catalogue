@@ -73,7 +73,3 @@ void ctlg::RequestHandler::SetBus(const BusRoute &route, const std::vector<std::
 void ctlg::RequestHandler::SetDistance(std::string_view stop1, std::string_view stop2, double distance){
     catalogue_->SetDistanceBetweenStops(stop1, stop2, distance);
 }
-
-
-
-

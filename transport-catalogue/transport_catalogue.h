@@ -37,6 +37,10 @@ public:
 
     int GetDistanceBetweenStops(std::string_view stop1, std::string_view stop2) const ; 
 
+    int GetOneWayDistance(std::string_view stop1, std::string_view stop2) const {
+        return distance_between_stops.at({GetStop(stop1), GetStop(stop2)});
+    }
+
 
     std::vector<std::string_view> GetRouteNames() const;
 

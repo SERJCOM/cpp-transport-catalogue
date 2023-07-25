@@ -159,10 +159,10 @@ void TransportCatalogue::SetDistanceBetweenStops(std::string_view stop1, std::st
 
 int TransportCatalogue::GetDistanceBetweenStops(std::string_view stop1, std::string_view stop2) const
 {
-    if(distance_between_stops.count({GetStop(stop1), GetStop(stop2)}) == 1){
+    if(distance_between_stops.find({GetStop(stop1), GetStop(stop2)}) != distance_between_stops.end()){
         return distance_between_stops.at({GetStop(stop1), GetStop(stop2)});
     }
-    if(distance_between_stops.count({GetStop(stop2), GetStop(stop1)}) == 1){
+    if(distance_between_stops.find({GetStop(stop2), GetStop(stop1)}) != distance_between_stops.end()){
         return distance_between_stops.at({GetStop(stop2), GetStop(stop1)});
     }
 

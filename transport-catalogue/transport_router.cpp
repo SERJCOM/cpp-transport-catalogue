@@ -56,19 +56,17 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                 edge.to = GetStopRide(name);
                 edge.weight = wait;    
 
-                edge.IsStop = true;
-
                 FillGraph(edge);
             }
 
-        // if(name == "4"){
-        //     int a = 5;
-        //     a++;
-        // }
+        if(name == "11"){
+            int a = 5;
+            a++;
+        }
 
 
         for(auto it = route->buses.begin(); it != route->buses.end(); it++){
-            int span = 0;
+            int span = 1;
 
             std::string_view it_name = (*it)->name;
             for(auto jt = it + 1; jt != route->buses.end(); jt++){
@@ -85,7 +83,7 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                     float length = 0;
                     auto it_s = it;
                     for(auto it_e = it + 1; it_e <= jt;  it_e++){
-                        length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
+                        length += catalogue.GetOneWayDistance((*(it_s))->name, (*it_e)->name);
                         it_s++;
                     }
                     edge.weight = CalculateTime(velocity, length);
@@ -98,7 +96,7 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
         if(route->type == BusRoute::Type::STRAIGHT){
         for(auto it = route->buses.rbegin() ; it != route->buses.rend() ; it++){
             std::string_view it_name = (*it)->name;
-            int span = 0; 
+            int span = 1; 
                 for(auto jt = it + 1; jt != route->buses.rend(); jt++){
                     std::string_view jt_name = (*jt)->name;
 
@@ -113,7 +111,7 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
                     float length = 0;
                     auto it_s = it;
                     for(auto it_e = it + 1; it_e <= jt;  it_e++){
-                        length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
+                        length += catalogue.GetOneWayDistance((*(it_s))->name, (*it_e)->name);
                         it_s++;
                     }
                     edge.weight = CalculateTime(velocity, length);
@@ -162,20 +160,17 @@ std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRou
             VertexId to = edge.to;
 
 
-            
+            auto find_name = [&](VertexId id){
+                if(vertexidwait_stopname_.find(id) != vertexidwait_stopname_.end()){
+                    return vertexidwait_stopname_.at(id);
+                }
+                return vertexidride_stopname_.at(id);
+            };
 
-           
-            
+            std::string_view from_name = find_name(from);
+            std::string_view to_name = find_name(to);
 
-            if(edge.IsStop){
-                auto find_name = [&](VertexId id){
-                    if(vertexidwait_stopname_.find(id) != vertexidwait_stopname_.end()){
-                        return vertexidwait_stopname_.at(id);
-                    }
-                    return vertexidride_stopname_.at(id);
-                };
-                 std::string_view from_name = find_name(from);
-
+            if(from_name == to_name){
                 RouteWait wait;
                 wait.name = from_name;
                 wait.time = edge.weight;

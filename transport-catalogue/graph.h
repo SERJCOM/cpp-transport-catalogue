@@ -24,8 +24,6 @@ struct Edge {
 
     std::string_view bus;
 
-    bool IsStop = false;
-
     bool operator==(const Edge<Weight>& edge) const {
         return std::tuple{from, to, weight} == std::tuple{edge.from, edge.to, edge.weight};
     }

@@ -38,17 +38,20 @@ class TransportRouter{
 
     using Edge = graph::Edge<float>;
 
-    explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2){
+    explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2), velocity(catalogue.GetVelocity() / 60.0), wait(catalogue.GetWaitTime()) {
+
         CreateGraph(catalogue);
     };
 
-    void CreateGraph(const TransportCatalogue& catalogue);
 
     void InitRouter();
 
     std::optional<std::vector<std::variant<RouteBus, RouteWait>>> FindRoute(std::string_view stop1, std::string_view stop2) const;
 
     private:
+
+    
+    void CreateGraph(const TransportCatalogue& catalogue);
 
     size_t GetStopWait(std::string_view name);
     size_t GetStopRide(std::string_view name);
@@ -60,36 +63,11 @@ class TransportRouter{
         graph_.AddEdge(edge);
     }
 
+
+    void CreateRideWaitStops(const BusRoute& route);
+
     template<typename T>
-    void BuildEdge(T begin, T end, std::string_view name, const TransportCatalogue &catalogue){
-        for(auto it = begin; it != end; it++){
-            int span = 0;
-            std::string_view it_name = (*it)->name;
-            for(auto jt = it + 1; jt != end; jt++){
-               std::string_view jt_name = (*jt)->name;
-
-                Edge edge;
-
-                edge.span = span;
-                span++;
-
-                    edge.from = GetStopRide(it_name);
-                    edge.to = GetStopWait(jt_name);
-
-                    float length = 0;
-                    auto it_s = it;
-                    for(auto it_e = it + 1; it_e <= jt;  it_e++){
-                        length += catalogue.GetDistanceBetweenStops((*(it_s))->name, (*it_e)->name);
-                        it_s++;
-                    }
-                    edge.weight = CalculateTime(velocity, length);
-               
-                edge.bus = name;
-
-                FillGraph(edge);
-            }
-        }
-    }
+    void BuildEdge(T begin, T end, std::string_view name, const TransportCatalogue &catalogue);
 
     Graph graph_;
 
@@ -99,7 +77,7 @@ class TransportRouter{
     std::unordered_map<graph::VertexId, std::string_view> vertexidwait_stopname_;
     std::unordered_map<graph::VertexId, std::string_view> vertexidride_stopname_;
 
-    int velocity ;
+    float velocity ;
     int wait;
 
 
@@ -107,5 +85,37 @@ class TransportRouter{
 
 };
 
+template <typename T>
+void TransportRouter::BuildEdge(T begin, T end, std::string_view name, const TransportCatalogue &catalogue)
+{
+    for(auto it = begin; it != end; it++){
+        int span = 1;
+
+        std::string_view it_name = (*it)->name;
+        for(auto jt = it + 1; jt != end; jt++){
+            std::string_view jt_name = (*jt)->name;
+
+            Edge edge;
+
+            edge.span = span;
+            span++;
+
+            edge.from = GetStopRide(it_name);
+            edge.to = GetStopWait(jt_name);
+
+            float length = 0;
+            auto it_s = it;
+            for(auto it_e = it + 1; it_e <= jt;  it_e++){
+                length += catalogue.GetOneWayDistance((*(it_s))->name, (*it_e)->name);
+                it_s++;
+            }
+            edge.weight = CalculateTime(velocity, length);
+        
+            edge.bus = name;
+
+            FillGraph(edge);
+        }
+    }
+}
 
 }

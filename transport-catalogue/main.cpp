@@ -57,7 +57,7 @@ void Test1(){
 
     {
         LOG_DURATION("PrintInformation");
-        // reader.PrintInformation(std::cout, handler);
+        reader.PrintInformation(std::cout, handler);
     }
 
 

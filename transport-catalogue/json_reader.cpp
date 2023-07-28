@@ -66,13 +66,13 @@ namespace print{
 class PrintElement{
 public:
     
-    virtual json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) = 0;
+    virtual void Print(json::Builder& builder, RequestHandler &request, const json::Node& node) = 0;
 };
 
 
 class PrintStop: public PrintElement{
 public:
-    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+    void Print(json::Builder& builder, RequestHandler &request, const json::Node& node) override {
         auto node_dict = node.AsDict();
 
         int id = node_dict.at("id").AsInt();
@@ -99,14 +99,13 @@ public:
 
         builder.EndDict();
 
-        return builder;
     }
 };
 
 
 class PrintBus: public PrintElement{
 public:
-    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+    void Print(json::Builder& builder, RequestHandler &request, const json::Node& node) override {
         auto node_dict = node.AsDict();
         int id = node_dict.at("id").AsInt(); 
         std::string name = node_dict.at("name").AsString();
@@ -136,14 +135,13 @@ public:
         builder.EndDict();
 
 
-        return builder;
     }
 };
 
 
 class PrintMap: public PrintElement{
 public:
-    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+    void Print(json::Builder& builder, RequestHandler &request, const json::Node& node) override {
         auto node_dict = node.AsDict();
         int id = node_dict.at("id").AsInt(); 
         builder.StartDict();
@@ -152,7 +150,6 @@ public:
         builder.Key("map").Value(std::move(map));
         builder.EndDict();
 
-        return builder;
     }
 };
 
@@ -160,7 +157,7 @@ public:
 
 class PrintRoute: public PrintElement{
 public:
-    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+    void Print(json::Builder& builder, RequestHandler &request, const json::Node& node) override {
 
         auto node_dict = node.AsDict();
         int id = node_dict.at("id").AsInt();
@@ -206,7 +203,6 @@ public:
         builder.Key("request_id").Value(id);
         builder.EndDict();
 
-        return builder;
     }
 };
 }   // namespace print
@@ -243,7 +239,7 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
         print::PrintElement& element = GetPrintElement(command);
 
-        builder = std::move(element.Print(builder, request, node));
+        element.Print(builder, request, node);
 
     }
 

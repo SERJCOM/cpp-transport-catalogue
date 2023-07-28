@@ -7,6 +7,9 @@ set(CXX_STANDARD 17)
 
 enable_testing()
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 add_executable(transport
  main.cpp 
  transport_catalogue.cpp

@@ -20,6 +20,22 @@ public:
         nodes_stack_.push_back(&root);
     }
 
+    Builder(const Builder& builder){
+        flag = builder.flag;
+        root = builder.root;
+        nodes_stack_ = builder.nodes_stack_;
+        Key_ = builder.Key_;
+    }
+
+    Builder& operator=(Builder builder){
+        flag = builder.flag;
+        root = std::move(builder.root);
+        nodes_stack_ = std::move(builder.nodes_stack_);
+        Key_ = std::move(builder.Key_);
+
+        return *this;
+    }
+
     KeyItemContext Key(std::string_view name);
 
     BaseItemContext Value(Node::Value value);

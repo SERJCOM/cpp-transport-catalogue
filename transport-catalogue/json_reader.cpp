@@ -58,9 +58,172 @@ void ctlg::JsonReader::ParseData(RequestHandler &request)
 
     request.SetVelocity(bus_velocity);
     request.SetWaitTime(bus_wait_time);
-        
     
+}
 
+namespace print{
+
+class PrintElement{
+public:
+    
+    virtual json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) = 0;
+};
+
+
+class PrintStop: public PrintElement{
+public:
+    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+        auto node_dict = node.AsDict();
+
+        int id = node_dict.at("id").AsInt();
+        std::string name = node_dict.at("name").AsString();
+        
+        builder.StartDict();
+        
+        if(request.GetCatalogue()->BusStopExist(name)){
+            json::Array buses ;
+            const auto& set = request.GetCatalogue()->GetRouteByStop(name);
+            for(const auto& str : set){
+                buses.push_back(std::string(str));
+            }
+            std::sort(buses.begin(), buses.end(), [&](json::Node& node1, json::Node& node2){
+                return node1.AsString() < node2.AsString();
+            });
+
+            builder.Key("buses").Value(std::move(buses));
+        }
+        else{
+            builder.Key("error_message").Value("not found");
+        }   
+        builder.Key("request_id").Value(id);
+
+        builder.EndDict();
+
+        return builder;
+    }
+};
+
+
+class PrintBus: public PrintElement{
+public:
+    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+        auto node_dict = node.AsDict();
+        int id = node_dict.at("id").AsInt(); 
+        std::string name = node_dict.at("name").AsString();
+
+        builder.StartDict();
+        
+
+        if(request.GetCatalogue()->GetRoute(name) == nullptr){
+            builder.Key("error_message").Value("not found");
+        }else{
+            
+            int route_length = request.GetRouteLength(name);
+            double length = request.GetGeoRouteLength(name);
+            int count = (int)request.GetCatalogue()->GetStops(name).size();
+            if(request.GetCatalogue()->GetRouteType(name) == ctlg::BusRoute::Type::STRAIGHT){
+                count = count * 2 - 1;
+            }
+            
+            builder.Key("route_length").Value(route_length);
+            builder.Key("curvature").Value((double)route_length / length);
+            builder.Key("unique_stop_count").Value((int)request.GetCatalogue()->GetUniqueStopsForRoute(name));
+            builder.Key("stop_count").Value(count);
+
+        }
+
+        builder.Key("request_id").Value(id);
+        builder.EndDict();
+
+
+        return builder;
+    }
+};
+
+
+class PrintMap: public PrintElement{
+public:
+    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+        auto node_dict = node.AsDict();
+        int id = node_dict.at("id").AsInt(); 
+        builder.StartDict();
+        builder.Key("request_id").Value(id);
+        std::string map = request.RenderMap();
+        builder.Key("map").Value(std::move(map));
+        builder.EndDict();
+
+        return builder;
+    }
+};
+
+
+
+class PrintRoute: public PrintElement{
+public:
+    json::Builder Print(json::Builder builder, RequestHandler &request, const json::Node& node) override {
+
+        auto node_dict = node.AsDict();
+        int id = node_dict.at("id").AsInt();
+        string_view from = node_dict.at("from").AsString();
+        string_view to = node_dict.at("to").AsString();
+        float total_time = 0;
+        auto routes = request.GetRoute(from, to);
+
+        builder.StartDict();
+
+        if(routes.has_value()){
+            builder.Key("items").StartArray();
+
+            for(const auto& route : routes.value()){
+                builder.StartDict();
+
+                if(holds_alternative<RouteWait>(route)){
+                    RouteWait wait = std::get<RouteWait>(route);
+                    builder.Key("stop_name").Value(std::string(wait.name));
+                    builder.Key("time").Value(wait.time);
+                    total_time += wait.time;
+                    builder.Key("type").Value("Wait");
+
+                } else if(holds_alternative<RouteBus>(route)){
+                    RouteBus bus = std::get<RouteBus>(route);
+                    builder.Key("bus").Value(std::string(bus.name));
+                    builder.Key("span_count").Value(bus.span_count);
+                    builder.Key("time").Value(bus.time);
+                    total_time += bus.time;
+                    builder.Key("type").Value("Bus");
+                }
+
+                builder.EndDict();
+            }
+            builder.EndArray();
+            builder.Key("total_time");
+            builder.Value(total_time);
+
+        }   else{
+            builder.Key("error_message").Value("not found");
+        }
+        
+        builder.Key("request_id").Value(id);
+        builder.EndDict();
+
+        return builder;
+    }
+};
+}   // namespace print
+
+print::PrintElement& GetPrintElement(std::string_view command){
+    using namespace print;
+    
+    static PrintMap map;
+    static PrintBus bus;
+    static PrintRoute route;
+    static PrintStop stop;
+
+    unordered_map<string_view, PrintElement&> elements = {
+        {"Stop"sv, stop}, {"Bus"sv, bus}, {"Map"sv, map}, {"Route"sv, route}
+    };
+
+    return elements.at(command);
 }
 
 
@@ -73,145 +236,15 @@ void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &re
 
     builder.StartArray();
 
+
     for(const auto& node : stat_requests){
 
-        if(node.AsDict().at("type").AsString() == "Stop"){
+        string_view command = node.AsDict().at("type").AsString();
 
-            
-            auto node_dict = node.AsDict();
+        print::PrintElement& element = GetPrintElement(command);
 
-            int id = node_dict.at("id").AsInt();
-            std::string name = node_dict.at("name").AsString();
-            
-            builder.StartDict();
-            
+        builder = std::move(element.Print(builder, request, node));
 
-            if(request.GetCatalogue()->BusStopExist(name)){
-               json::Array buses ;
-               const auto& set = request.GetCatalogue()->GetRouteByStop(name);
-                for(const auto& str : set){
-                    buses.push_back(std::string(str));
-                }
-                std::sort(buses.begin(), buses.end(), [&](json::Node& node1, json::Node& node2){
-                    return node1.AsString() < node2.AsString();
-                });
-
-                builder.Key("buses").Value(std::move(buses));
-            }
-            else{
-                builder.Key("error_message").Value("not found");
-            }   
-            builder.Key("request_id").Value(id);
-
-            
-            builder.EndDict();
-        }
-        else if(node.AsDict().at("type").AsString() == "Bus"){
-
-
-            auto node_dict = node.AsDict();
-            int id = node_dict.at("id").AsInt(); 
-            std::string name = node_dict.at("name").AsString();
-
-            builder.StartDict();
-            
-
-            if(request.GetCatalogue()->GetRoute(name) == nullptr){
-                builder.Key("error_message").Value("not found");
-            }else{
-                
-                int route_length = request.GetRouteLength(name);
-                double length = request.GetGeoRouteLength(name);
-                int count = (int)request.GetCatalogue()->GetStops(name).size();
-                if(request.GetCatalogue()->GetRouteType(name) == ctlg::BusRoute::Type::STRAIGHT){
-                    count = count * 2 - 1;
-                }
-                
-                builder.Key("route_length").Value(route_length);
-                builder.Key("curvature").Value((double)route_length / length);
-                builder.Key("unique_stop_count").Value((int)request.GetCatalogue()->GetUniqueStopsForRoute(name));
-                builder.Key("stop_count").Value(count);
-
-            }
-
-            builder.Key("request_id").Value(id);
-            builder.EndDict();
-        }
-        else if(node.AsDict().at("type").AsString() == "Map"){
-            
-            auto node_dict = node.AsDict();
-            int id = node_dict.at("id").AsInt(); 
-
-            builder.StartDict();
-
-            builder.Key("request_id").Value(id);
-
-            std::string map = request.RenderMap();
-
-            builder.Key("map").Value(std::move(map));
-
-            builder.EndDict();
-        }
-        else if(node.AsDict().at("type").AsString() == "Route"){
-
-            auto node_dict = node.AsDict();
-            int id = node_dict.at("id").AsInt();
-
-            string_view from = node_dict.at("from").AsString();
-            string_view to = node_dict.at("to").AsString();
-
-            builder.StartDict();
-
-            float total_time = 0;
-
-            auto routes = request.GetRoute(from, to);
-
-            if(routes.has_value()){
-
-            builder.Key("items").StartArray();
-
-            for(const auto& route : routes.value()){
-
-                builder.StartDict();
-                
-                if(holds_alternative<RouteWait>(route)){
-
-                    RouteWait wait = std::get<RouteWait>(route);
-
-                    builder.Key("stop_name").Value(std::string(wait.name));
-                    builder.Key("time").Value(wait.time);
-                    total_time += wait.time;
-                    builder.Key("type").Value("Wait");
-
-                } else if(holds_alternative<RouteBus>(route)){
-
-                    RouteBus bus = std::get<RouteBus>(route);
-
-                    builder.Key("bus").Value(std::string(bus.name));
-                    builder.Key("span_count").Value(bus.span_count);
-                    builder.Key("time").Value(bus.time);
-                    total_time += bus.time;
-                    builder.Key("type").Value("Bus");
-                }
-
-                builder.EndDict();
-            }
-
-            builder.EndArray();
-
-            builder.Key("total_time");
-            builder.Value(total_time);
-
-            }
-            else{
-                builder.Key("error_message").Value("not found");
-            }
-            
-            
-            builder.Key("request_id").Value(id);
-
-            builder.EndDict();
-        }
     }
 
     builder.EndArray();

@@ -10,7 +10,6 @@
 #include "router.h"
 #include <fstream>
 
-#define LOG
 
 #include "log_duration.h"
 
@@ -23,7 +22,6 @@ using namespace graph;
 void Test1(){
 
     ifstream file("vivod.txt");
-
 
     TransportCatalogue tr;
 
@@ -59,16 +57,10 @@ void Test1(){
 
     {
         LOG_DURATION("PrintInformation");
-        reader.PrintInformation(std::cout, handler);
+        // reader.PrintInformation(std::cout, handler);
     }
 
-    // ofstream svg("test.svg");
 
-
-
-    // svg << handler.RenderMap() << endl;
-
-    
 
 }
 

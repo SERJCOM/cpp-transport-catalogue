@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package srlz;
+
+message StopsDataBase{
+    repeated string stops = 1;
+}
+
+message RoadDistances{
+    uint32 stop = 1;
+    uint32 length = 2;
+}
+
+message Bus{
+    string name = 1;
+    bool is_roundtrip = 2; // 1 - true, 2 - false
+    repeated uint32 stops = 3;
+}
+
+message Stop{
+    double latitude = 1;
+    double longitude = 2;
+    string name = 3;
+    repeated RoadDistances road_distances = 4;
+}   
+
+message TransportCatalogue{
+    repeated Bus bus = 1;
+    repeated Stop stop = 2;
+    StopsDataBase stops_db = 3;
+}

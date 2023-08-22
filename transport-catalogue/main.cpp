@@ -1,72 +1,44 @@
-#include "transport_catalogue.h"
+#include <fstream>
 #include <iostream>
-#include <string>
-#include <sstream>
+#include <string_view>
+
+#include "serialization.h"
 #include "json_reader.h"
-#include "request_handler.h"
-#include <fstream>
-#include "map_renderer.h"
-#include <algorithm>
-#include "router.h"
-#include <fstream>
+#include "transport_catalogue.h"
 
-
-#include "log_duration.h"
-
-using namespace std;
+using namespace std::literals;
 using namespace ctlg;
-using namespace graph;
 
-
-
-void Test1(){
-
-    ifstream file("vivod.txt");
-
-    TransportCatalogue tr;
-
-    RequestHandler handler(&tr);
-
-    JsonReader reader;
-
-    MapRenderer map;
-
-    handler.SetRenderMap(&map);
-    reader.LoadDocument(file);
-
-    {
-        LOG_DURATION("ParseData");
-
-        reader.ParseData(handler);
-    }
-
-    reader.SetMapRenderer(map);
-
-    LogDuration log_route("TransportRouter create");
-    TransportRouter router(tr);
-    log_route.Print();
-
-    {
-        LOG_DURATION("router init");
-        router.InitRouter();
-    }
-    
-
-    handler.SetRouter(router);
-
-
-    {
-        LOG_DURATION("PrintInformation");
-        reader.PrintInformation(std::cout, handler);
-    }
-
-
-
+void PrintUsage(std::ostream& stream = std::cerr) {
+    stream << "Usage: transport_catalogue [make_base|process_requests]\n"sv;
 }
 
-int main(){
 
-    Test1();
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        PrintUsage();
+        return 1;
+    }
 
+    const std::string_view mode(argv[1]);
 
+    if (mode == "make_base"sv) {
+
+        Serialization(std::cin);
+
+    } else if (mode == "process_requests"sv) {
+
+        TransportCatalogue tr;
+        RequestHandler handler(&tr);
+
+        json::Document doc = json::Load(std::cin);
+
+        Deserialization(doc, handler);
+
+        PrintInformation(doc, std::cout, handler);
+
+    } else {
+        PrintUsage();
+        return 1;
+    }
 }

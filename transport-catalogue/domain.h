@@ -22,7 +22,7 @@ struct BusRoute{
         CYCLIC
     };
 
-    std::vector<const BusStop*> buses; // это должно быть константным 
+    std::vector<const BusStop*> buses; 
     std::string name;
     Type type;
 };

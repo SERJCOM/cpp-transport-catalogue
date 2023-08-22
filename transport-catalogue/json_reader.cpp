@@ -21,21 +21,21 @@ void ctlg::JsonReader::ParseData(RequestHandler &request)
         if(nodedict.at("type").AsString() == "Bus"){
             BusRoute bus;
 
-           std::string name = nodedict.at("name").AsString();
+            std::string name = nodedict.at("name").AsString();
 
-           std::vector<std::string> stops;
-           if(nodedict.at("is_roundtrip").AsBool()){
-            bus.type = ctlg::BusRoute::Type::CYCLIC;
-           }
-           else{
-            bus.type = ctlg::BusRoute::Type::STRAIGHT;
-           }
-           
-           for(auto i : nodedict.at("stops").AsArray()){
+            std::vector<std::string> stops;
+            if(nodedict.at("is_roundtrip").AsBool()){
+                bus.type = ctlg::BusRoute::Type::CYCLIC;
+            }
+            else{
+                bus.type = ctlg::BusRoute::Type::STRAIGHT;
+            }
+
+            for(auto i : nodedict.at("stops").AsArray()){
                 stops.push_back(i.AsString());
-           }
+            }
 
-           request.GetCatalogue()->AddBusRoute(stops, std::move(name), bus.type);
+            request.GetCatalogue()->AddBusRoute(stops, std::move(name), bus.type);
         }
         else if(nodedict.at("type").AsString() == "Stop"){
             std::string name = nodedict.at("name").AsString();
@@ -224,28 +224,7 @@ print::PrintElement& GetPrintElement(std::string_view command){
 
 
 void ctlg::JsonReader::PrintInformation(std::ostream &output, RequestHandler &request){
-
-
-    auto stat_requests = doc_.GetRoot().AsDict().at("stat_requests").AsArray();
-
-    json::Builder builder;
-
-    builder.StartArray();
-
-
-    for(const auto& node : stat_requests){
-
-        string_view command = node.AsDict().at("type").AsString();
-
-        print::PrintElement& element = GetPrintElement(command);
-
-        element.Print(builder, request, node);
-
-    }
-
-    builder.EndArray();
-
-    json::Print(json::Document(std::move(builder.Build())), output);
+    ctlg::PrintInformation(doc_, output, request);
 }
 
 svg::Color ParsingColor(const json::Node& node){
@@ -307,4 +286,28 @@ void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
 
     render.data_ = data;
     
+}
+
+void ctlg::PrintInformation(const json::Document &doc, std::ostream &output, RequestHandler &request)
+{
+    auto stat_requests = doc.GetRoot().AsDict().at("stat_requests").AsArray();
+
+    json::Builder builder;
+
+    builder.StartArray();
+
+
+    for(const auto& node : stat_requests){
+
+        string_view command = node.AsDict().at("type").AsString();
+
+        print::PrintElement& element = GetPrintElement(command);
+
+        element.Print(builder, request, node);
+
+    }
+
+    builder.EndArray();
+
+    json::Print(json::Document(std::move(builder.Build())), output);
 }

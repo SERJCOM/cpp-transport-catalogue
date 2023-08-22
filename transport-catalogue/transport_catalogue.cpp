@@ -20,8 +20,7 @@ void TransportCatalogue::AddBusStop(const BusStop& stop){
         it->coord = stop.coord;
     }
         
-        
-    
+
 }
 
 /// @brief добавление маршрута в базу данных
@@ -33,23 +32,17 @@ void TransportCatalogue::AddBusRoute(const std::vector<std::string>& route, stri
     res.name = std::move(num);
     res.type = type;
 
-
-
     if(name_busroute_database.count(num) == 0){
         for(const auto& stop : route){
             res.buses.push_back(CreateBusStop(stop));
-
         }
 
         busroute_database.push_back(std::move(res));
         name_busroute_database[busroute_database.back().name] = &busroute_database.back(); 
 
-
         for(const BusStop* stop : name_busroute_database[busroute_database.back().name]->buses){
-
             busstop_busroute_database[stop->name].insert(busroute_database.back().name);
-        }
-        
+        }        
     }
 }
 

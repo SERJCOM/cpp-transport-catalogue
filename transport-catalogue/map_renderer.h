@@ -25,7 +25,7 @@ struct MapRenderData{
     svg::Color underlayer_color;
     double underlayer_width;
     std::vector<svg::Color> color_palette;
-    };
+};
 
 class SphereProjector {
 public:
@@ -99,27 +99,27 @@ private:
 
 class MapRenderer{
 public:
-MapRenderer(){
+    MapRenderer(){
 
-}
-
-
-MapRenderData data_;
+    }
 
 
-void DrawMap(std::ostream& out, const std::vector<const ctlg::BusRoute*>& routes);
+    MapRenderData data_;
 
 
-private:
-
-SphereProjector projector;
-
-svg::Text CreateText(const BusRoute* route , int pos);
-
-svg::Text CreatePodlozhka(const svg::Text& text);
+    void DrawMap(std::ostream& out, const std::vector<const ctlg::BusRoute*>& routes);
 
 
-std::vector<const BusStop*> CreateLines(const BusRoute* route, svg::Document& doc, int pos);
+    private:
+
+    SphereProjector projector;
+
+    svg::Text CreateText(const BusRoute* route , int pos);
+
+    svg::Text CreatePodlozhka(const svg::Text& text);
+
+
+    std::vector<const BusStop*> CreateLines(const BusRoute* route, svg::Document& doc, int pos);
 
 // void DrawRoute(std::ostream& out, const BusRoute& route);
 

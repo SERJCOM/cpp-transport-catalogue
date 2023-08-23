@@ -10,6 +10,6 @@ namespace ctlg{
 
 bool Serialization(std::istream& in);
 
-bool Deserialization(const json::Document& doc, ctlg::RequestHandler handler);
+bool Deserialization(const json::Document& doc, RequestHandler& handler);
 
 }

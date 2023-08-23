@@ -70,7 +70,6 @@ public:
 
     void SetVelocity(float velocity){
         assert(catalogue_);
-
         catalogue_->SetBusVelocity(velocity);
     }
 

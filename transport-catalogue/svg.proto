@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package srlz;
+
+message ColorString{
+    string color = 1;
+}
+
+message ColorArray{
+    repeated float color = 1;
+}
+
+
+message Color{
+    ColorString color_string = 1;
+    ColorArray color_array = 2;
+}

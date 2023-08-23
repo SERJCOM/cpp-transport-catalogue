@@ -14,6 +14,8 @@ void PrintUsage(std::ostream& stream = std::cerr) {
 }
 
 
+
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         PrintUsage();
@@ -33,7 +35,15 @@ int main(int argc, char* argv[]) {
 
         json::Document doc = json::Load(std::cin);
 
+        MapRenderer map;
+        handler.SetRenderMap(&map);
+
         Deserialization(doc, handler);
+
+        TransportRouter router(tr);
+        router.InitRouter();
+        handler.SetRouter(router);
+        
 
         PrintInformation(doc, std::cout, handler);
 
@@ -41,4 +51,4 @@ int main(int argc, char* argv[]) {
         PrintUsage();
         return 1;
     }
-}
+}   

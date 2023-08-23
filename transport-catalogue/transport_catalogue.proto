@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package srlz;
 
+import "map_renderer.proto";
+
 message StopsDataBase{
     repeated string stops = 1;
 }
@@ -24,8 +26,16 @@ message Stop{
     repeated RoadDistances road_distances = 4;
 }   
 
+message RoutingSettings{
+    float bus_wait_time = 1;
+    float bus_velocity = 2;
+}
+
 message TransportCatalogue{
     repeated Bus bus = 1;
     repeated Stop stop = 2;
     StopsDataBase stops_db = 3;
+    RenderSetting render_settings = 4;
+    RoutingSettings routing_settings = 5;
+
 }

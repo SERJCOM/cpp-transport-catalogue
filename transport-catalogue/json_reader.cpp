@@ -23,6 +23,8 @@ void ctlg::JsonReader::ParseData(RequestHandler &request)
 
             std::string name = nodedict.at("name").AsString();
 
+            
+
             std::vector<std::string> stops;
             if(nodedict.at("is_roundtrip").AsBool()){
                 bus.type = ctlg::BusRoute::Type::CYCLIC;
@@ -51,14 +53,6 @@ void ctlg::JsonReader::ParseData(RequestHandler &request)
         }
     }
 
-    auto routing_settings = doc_.GetRoot().AsDict().at("routing_settings").AsDict();
-        
-    int bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
-    float bus_velocity = routing_settings.at("bus_velocity").AsInt();
-
-    request.SetVelocity(bus_velocity);
-    request.SetWaitTime(bus_wait_time);
-    
 }
 
 namespace print{
@@ -246,7 +240,7 @@ svg::Color ParsingColor(const json::Node& node){
 }
 
 
-void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
+void ctlg::JsonReader::ParseMapRenderer(MapRenderer &render)
 {
     auto render_settings = doc_.GetRoot().AsDict().at("render_settings").AsDict();
 
@@ -288,6 +282,17 @@ void ctlg::JsonReader::SetMapRenderer(MapRenderer &render)
     
 }
 
+// void ctlg::JsonReader::ParseRoutingSettings(TransportRouter &router)
+// {
+//     auto routing_settings = doc_.GetRoot().AsDict().at("routing_settings").AsDict();
+        
+//     int bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
+//     float bus_velocity = routing_settings.at("bus_velocity").AsInt();
+
+//     router.SetVelocity(bus_velocity);
+//     router.SetWaitTime(bus_wait_time);
+// }
+
 void ctlg::PrintInformation(const json::Document &doc, std::ostream &output, RequestHandler &request)
 {
     auto stat_requests = doc.GetRoot().AsDict().at("stat_requests").AsArray();
@@ -310,4 +315,9 @@ void ctlg::PrintInformation(const json::Document &doc, std::ostream &output, Req
     builder.EndArray();
 
     json::Print(json::Document(std::move(builder.Build())), output);
+}
+
+std::string ctlg::JsonReader::GetFileName()
+{
+    return doc_.GetRoot().AsDict().at("serialization_settings").AsDict().at("file").AsString();   
 }

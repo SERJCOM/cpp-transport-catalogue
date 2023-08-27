@@ -11,7 +11,6 @@
 
 namespace ctlg{
 
-
 class TransportCatalogue{
 public:
 
@@ -21,7 +20,7 @@ public:
 
     bool BusStopExist(std::string_view stop) const;
 
-    std::vector<BusStop> GetStops(std::string_view num) const ;
+    std::vector<const BusStop*> GetStops(std::string_view num) const ;
 
     const BusStop* GetStop(std::string_view name) const ;
 
@@ -68,6 +67,15 @@ public:
 
     int GetBusCount() const {
         return busroute_database.size();
+    }
+
+    const std::deque<BusStop>& GetAllStops() const {
+        return busstop_database;
+    }
+
+    using distance_map = std::unordered_map<std::pair<const BusStop*, const BusStop*>, int, ctlg::Hash::BusA_BusB>;
+    const distance_map& GetDistanceBetweenStops() const {
+        return distance_between_stops;
     }
 
 private:

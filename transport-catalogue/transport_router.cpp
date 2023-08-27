@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "log_duration.h"
+
 
 using namespace ctlg;
 using namespace graph;
@@ -29,23 +29,23 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
         CreateRideWaitStops(*route);
 
     
-        for(auto it = route->buses.begin(); it != route->buses.end(); it++){
+        for(auto it = route->stops.begin(); it != route->stops.end(); it++){
             Edge edge;
 
             std::string_view name = (*it)->name;
 
             edge.from = GetStopWait(name);
             edge.to = GetStopRide(name);
-            edge.weight = wait;    
+            edge.weight = GetWaitTime();    
 
             FillGraph(edge);
         }
 
 
-        BuildEdge(route->buses.begin(), route->buses.end(), name, catalogue);
+        BuildEdge(route->stops.begin(), route->stops.end(), name, catalogue);
 
         if(route->type == BusRoute::Type::STRAIGHT){
-            BuildEdge(route->buses.rbegin(), route->buses.rend(), name, catalogue);
+            BuildEdge(route->stops.rbegin(), route->stops.rend(), name, catalogue);
         }
 
 
@@ -123,7 +123,7 @@ inline float ctlg::TransportRouter::CalculateTime(float velocity, float length)
 
 void ctlg::TransportRouter::CreateRideWaitStops(const BusRoute &route)
 {
-    for(auto it = route.buses.begin(); it != route.buses.end(); it++){
+    for(auto it = route.stops.begin(); it != route.stops.end(); it++){
             
         std::string_view name = (*it)->name;
 

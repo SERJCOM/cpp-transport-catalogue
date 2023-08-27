@@ -103,6 +103,13 @@ public:
 
     }
 
+    const MapRenderData& GetData() const{
+        return data_;
+    }
+
+    MapRenderData& GetData(){
+        return data_;
+    }
 
     MapRenderData data_;
 

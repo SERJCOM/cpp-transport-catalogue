@@ -1,177 +1,205 @@
 #include "serialization.h"
-#include <transport_catalogue.pb.h>
 #include <unordered_map>
 #include "map_renderer.h"
 #include <iostream>
+#include <string_view>
+#include <utility>
+#include <vector>
+#include <unordered_set>
 
-using namespace json;
 using namespace std;
 using namespace ctlg;
+using namespace serialize;
 
 
-std::string_view GetFileName(const json::Document &doc)
+void serialize::Settings::SetFileName(string name){
+    filename_ = move(name);
+}
+
+serialize::Settings::Settings(std::string name)
 {
-    return doc.GetRoot().AsDict().at("serialization_settings").AsDict().at("file").AsString();   
+    SetFileName(move(name));
 }
 
-int GetStopIndex(unordered_map<string, int>& stop_index, const string& name){
-    if(stop_index.count(name) == 0){
-        stop_index[name] = stop_index.size();
-    }
-
-    return stop_index.at(name);
-}
-
-void BaseRequestsSerialization(srlz::TransportCatalogue& db, const Document& doc){
-    Array base_requests = doc.GetRoot().AsDict().at("base_requests").AsArray();
-    unordered_map<string, int> stop_index;
-
-    for(int i = 0; i < base_requests.size(); i++){
-        Dict data = base_requests[i].AsDict();
-
-        if(data["type"].AsString() == "Bus"){
-            srlz::Bus bus;
-
-            bus.set_name(data["name"].AsString());
-            bus.set_is_roundtrip(data["is_roundtrip"].AsBool());
-            
-            for(const auto& node : data["stops"].AsArray()){
-                const string& stop = node.AsString();
-                int index = GetStopIndex(stop_index, stop);
-                bus.add_stops(index);
-            }
-
-            *db.add_bus() = std::move(bus);
-        }
-        else{
-            srlz::Stop stop;
-
-            stop.set_latitude(data["latitude"].AsDouble());
-            stop.set_longitude(data["longitude"].AsDouble());
-            stop.set_name(data["name"].AsString());
-
-            for(const auto& node : data["road_distances"].AsDict()){
-                srlz::RoadDistances rd;
-                rd.set_stop(GetStopIndex(stop_index, node.first));
-                rd.set_length(node.second.AsInt());
-                *stop.add_road_distances() = std::move(rd);
-            }
-
-            *db.add_stop() = std::move(stop);
-        }
-    }
-
-    std::vector<string> dbstops(stop_index.size());
-    for(const auto&[stop, index] : stop_index){
-        dbstops[index] = stop;
-    }
-
-    srlz::StopsDataBase stopdatabase;
-    for(auto& stop : dbstops){
-        stopdatabase.add_stops(std::move(stop));
-    }
-
-    *db.mutable_stops_db() = move(stopdatabase);
-}
-
-
-srlz::Color ParseColor(const Node& node){
-    using namespace srlz;
-    Color color;
-    if(node.IsString()){
-        ColorString colorString;
-        colorString.set_color(node.AsString());
-        *color.mutable_color_string() = move(colorString);
-    }
-    else {
-        bool temp = node.IsArray();
-        // cout << temp << endl;
-        ColorArray colorArray;
-        for(const Node& colorNode : node.AsArray()){
-            colorArray.add_color(colorNode.AsDouble()) ;
-        }
-        *color.mutable_color_array() = move(colorArray);
-    }
-
-    return color;
-}
-
-void RenderSettingsSerialization(srlz::TransportCatalogue& db,  const Document& doc){
-    using namespace srlz;
-    RenderSetting render;
-    Dict setting = doc.GetRoot().AsDict().at("render_settings").AsDict();
-    render.set_width(setting.at("width").AsDouble());
-    render.set_height(setting.at("height").AsDouble());
-    render.set_padding(setting.at("padding").AsDouble());
-    render.set_stop_radius(setting.at("stop_radius").AsDouble());
-    render.set_line_width(setting.at("line_width").AsDouble());
-    render.set_bus_label_font_size(setting.at("bus_label_font_size").AsDouble());
-    render.set_stop_label_font_size(setting.at("stop_label_font_size").AsDouble());
-    render.set_underlayer_width(setting.at("underlayer_width").AsDouble());
-
-    for(const Node& node : setting.at("bus_label_offset").AsArray()){
-        render.add_bus_label_offset(node.AsDouble());
-    }
-    int temp = render.bus_label_offset_size();
-
-    for(const Node& node : setting.at("stop_label_offset").AsArray()){
-        render.add_stop_label_offset(node.AsDouble());
-    }
-
-
-    *render.mutable_underlayer_color() = ParseColor(setting.at("underlayer_color"));
-
-    for(const Node& node : setting.at("color_palette").AsArray()){
-        *render.add_color_palette() = ParseColor(node);
-    }
-
-    *db.mutable_render_settings() = move(render);
-}
-
-void RoutingSettingsSerialization(srlz::TransportCatalogue& db,  const Document& doc){
-    using namespace srlz;
-    RoutingSettings routing;
-    Dict settings = doc.GetRoot().AsDict().at("routing_settings").AsDict();
-    routing.set_bus_velocity(settings.at("bus_velocity").AsDouble());
-    routing.set_bus_wait_time(settings.at("bus_wait_time").AsDouble());
-
-    *db.mutable_routing_settings() = routing;
-}
-
-
-
-bool ctlg::Serialization(istream &in)
+string_view serialize::Settings::GetFileName()
 {
-    Document doc = Load(in);
-    string filename(GetFileName(doc));
+    return filename_;
+}
 
-    ofstream file(filename, ios::binary);  
-    
-    srlz::TransportCatalogue db;
+serialize::Serialization::Serialization(Settings settings)
+{
+    SetSettings(move(settings));
+}
 
-    BaseRequestsSerialization(db, doc);
-    RenderSettingsSerialization(db, doc);
-    RoutingSettingsSerialization(db, doc);
+bool serialize::Serialization::Save()
+{
+    ofstream file(settings_.GetFileName().data(), ios::binary);
 
-    db.SerializeToOstream(&file);
+    if(!db_.SerializeToOstream(&file)){
+        return false;
+    }
 
-    return true;
+    return false;
+}
+
+Serialization &serialize::Serialization::CatalogueSerialization(const TransportCatalogue &catalogue)
+{
+    std::unordered_map<string, int> name_index; // stop_name --- index
+    for(auto stop : catalogue.GetAllStops()){
+        if(name_index.count(stop.name) == 0){
+            name_index[stop.name] = name_index.size();
+        }
+    }
+
+    for(const auto&[name, index] : name_index){
+        auto stop = catalogue.GetStop(name);
+        srlz::Stop _stop;
+        _stop.set_name(index);
+        _stop.set_latitude(stop->coord.lat);
+        _stop.set_longitude(stop->coord.lng);
+        *db_.add_stop() = _stop;
+    }
+
+
+    for(auto [stops, length] : catalogue.GetDistanceBetweenStops()){
+        srlz::RoadDistances rdDist;
+        string_view stop_from = stops.first->name;
+        string_view stop_to = stops.second->name;
+        rdDist.set_stop_from(name_index.at(stop_from.data()));
+        rdDist.set_stop_to(name_index.at(stop_to.data()));
+
+        rdDist.set_length(length);
+
+        *db_.add_distance() = rdDist;
+    }
+
+    for(auto bus : catalogue.GetRouteDataBase()){
+        srlz::Bus _bus;
+        _bus.set_is_roundtrip((bus->type == ctlg::BusRoute::Type::CYCLIC)); // todo возможно ошибка
+        _bus.set_name(bus->name);
+        for(const BusStop* stop : bus->stops){
+            _bus.add_stops(name_index.at(stop->name));
+        }
+        *db_.add_bus() = move(_bus);
+    }
+
+    vector<string> index_name(name_index.size());
+    for(const auto& [name, index] : name_index){
+        index_name[index] = name;
+    }
+
+    srlz::StopsDataBase stopsDb;
+    for(const string& name : index_name){
+        stopsDb.add_stops(name);
+    }
+
+    *db_.mutable_stops_db() = move(stopsDb);
+
+    return *this;
 }
 
 
-void BaseRequestsDeserialization(ctlg::RequestHandler& handler, const srlz::TransportCatalogue& db){
+srlz::Color GetColor(const svg::Color& color){
+    srlz::Color _color;
+    if(holds_alternative<string>(color)){
+        srlz::ColorString colorstr;
+        colorstr.set_color(std::get<string>(color));
+        *_color.mutable_color_string() = move(colorstr);
+        
+    } else if(holds_alternative<svg::Rgb>(color)){
+        srlz::ColorArray colorar;
+        svg::Rgb rgb = get<svg::Rgb>(color);
+        colorar.add_color(rgb.red);
+        colorar.add_color(rgb.green);
+        colorar.add_color(rgb.blue);
+        *_color.mutable_color_array() = colorar;
+    }
+    else if(holds_alternative<svg::Rgba>(color)){
+        srlz::ColorArray colorar;
+        svg::Rgba rgb = get<svg::Rgba>(color);
+        colorar.add_color(rgb.red);
+        colorar.add_color(rgb.green);
+        colorar.add_color(rgb.blue);
+        colorar.add_color(rgb.opacity);
+        *_color.mutable_color_array() = colorar;
+    }
+
+    return _color;
+}
+
+
+serialize::Serialization &serialize::Serialization::MapRendererSerialization(const MapRenderer &renderer)
+{
+    srlz::RenderSetting render;
+    render.set_width(renderer.GetData().width);
+    render.set_height(renderer.GetData().height);
+    render.set_padding(renderer.GetData().padding);
+    render.set_stop_radius(renderer.GetData().stop_radius);
+    render.set_line_width(renderer.GetData().line_width);
+    render.set_bus_label_font_size(renderer.GetData().bus_label_font_size);
+    render.set_stop_label_font_size(renderer.GetData().stop_label_font_size);
+    render.set_underlayer_width(renderer.GetData().underlayer_width);
+
+    render.add_bus_label_offset(renderer.GetData().bus_label_offset.first);
+    render.add_bus_label_offset(renderer.GetData().bus_label_offset.second);
+
+    render.add_stop_label_offset(renderer.GetData().stop_label_offset.first);
+    render.add_stop_label_offset(renderer.GetData().stop_label_offset.second);
+
+    *render.mutable_underlayer_color() = GetColor(renderer.GetData().underlayer_color);
+
+    for(const auto& color : renderer.GetData().color_palette){
+        *render.add_color_palette() = GetColor(color);
+    }
+
+    *db_.mutable_render_settings() = move(render);
+
+    return *this;
+
+}
+
+// Serialization &serialize::Serialization::RoutingSettingsSerialization(const ctlg::TransportRouter &router)
+// {
+//     srlz::RoutingSettings settings;
+//     settings.set_bus_velocity(router.GetVelocity());
+//     settings.set_bus_wait_time(router.GetVelocity());
+//     *db_.mutable_routing_settings() = settings;
+//     return *this;
+// }
+
+void serialize::Serialization::SetSettings(Settings settings)
+{
+    settings_ = move(settings);
+}
+
+serialize::Deserialization::Deserialization(Settings settings)
+{
+    ifstream file(settings.GetFileName().data(), ios::binary);
+
+    db_.ParseFromIstream(&file);
+}
+
+ctlg::TransportCatalogue serialize::Deserialization::CatalogueDeserialization()
+{
+    TransportCatalogue catalogue;
+
     vector<string> stopsdb;
-    stopsdb.reserve(db.stops_db().stops_size());
+    stopsdb.reserve(db_.stops_db().stops_size());
 
-    for(int i = 0; i < db.stops_db().stops_size(); i++){
-        stopsdb.push_back(db.stops_db().stops(i));
+    for(int i = 0; i < db_.stops_db().stops_size(); i++){
+        stopsdb.push_back(db_.stops_db().stops(i));
     }
 
-    for(int i = 0; i < db.bus_size(); i++){
+    for(int i = 0; i < db_.bus_size(); i++){
         ctlg::BusRoute bus;
-        srlz::Bus prbus = db.bus(i);
+        srlz::Bus prbus = db_.bus(i);
 
         bus.name = prbus.name();
+
+        // if(bus.name == "g"){
+        //     cout << "true" << endl;;
+        // }
+
         if(prbus.is_roundtrip()){
             bus.type = ctlg::BusRoute::Type::CYCLIC;
         }
@@ -184,26 +212,29 @@ void BaseRequestsDeserialization(ctlg::RequestHandler& handler, const srlz::Tran
         for(int i = 0; i < prbus.stops_size(); i++){
             stops.push_back(stopsdb.at(prbus.stops(i)));
         }
-        handler.GetCatalogue()->AddBusRoute(stops, std::move(bus.name), bus.type);
+
+        catalogue.AddBusRoute(stops, std::move(bus.name), bus.type);
     }
 
-    for(int i = 0; i < db.stop_size(); i++){
-        srlz::Stop prstop = db.stop(i);
+    for(int i = 0; i < db_.stop_size(); i++){
+        srlz::Stop prstop = db_.stop(i);
         ctlg::BusStop stop;
 
-        stop.name = prstop.name();
+        stop.name = stopsdb[prstop.name()];
         stop.coord.lat = prstop.latitude();
         stop.coord.lng = prstop.longitude();
-        handler.GetCatalogue()->AddBusStop(stop);
-
-        for(int i = 0; i < prstop.road_distances_size(); i++){
-            handler.GetCatalogue()->SetDistanceBetweenStops(stop.name, stopsdb.at(prstop.mutable_road_distances(i)->stop()), prstop.mutable_road_distances(i)->length());
-        }
+        catalogue.AddBusStop(stop);
     }
+
+    for(int i = 0; i < db_.distance_size(); i++){
+        srlz::RoadDistances distance = db_.distance(i);
+        catalogue.SetDistanceBetweenStops(stopsdb.at(distance.stop_from()), stopsdb.at(distance.stop_to()), distance.length());
+    }
+
+    return catalogue;
 }
 
 svg::Color ParsingColor(const srlz::Color& color){
-
     if(color.has_color_array()){
         srlz::ColorArray colorArray = color.color_array();
         if(colorArray.color_size() == 4){
@@ -217,57 +248,46 @@ svg::Color ParsingColor(const srlz::Color& color){
     }
 }
 
-void RenderSettingsDeserialization(MapRenderer &render, const srlz::RenderSetting& render_settings){
-    using namespace srlz;
-    MapRenderData data;
+ctlg::MapRenderer serialize::Deserialization::MapRendererDeserialization()
+{
+    MapRenderer render;
 
-    data.width = render_settings.width();
-    data.height = render_settings.height();
-    data.padding = render_settings.padding();
-    data.line_width = render_settings.line_width();
-    data.stop_radius = render_settings.stop_radius();
-    data.bus_label_font_size = render_settings.bus_label_font_size();
-    int temp = render_settings.bus_label_offset_size();
-    data.bus_label_offset.first = render_settings.bus_label_offset(0);
-    data.bus_label_offset.second = render_settings.bus_label_offset(1);
-    data.stop_label_font_size = render_settings.stop_label_font_size();
-    data.stop_label_offset.first = render_settings.stop_label_offset(0);
-    data.stop_label_offset.second = render_settings.stop_label_offset(1);
     
-    data.underlayer_color = ParsingColor(render_settings.underlayer_color());
+    render.GetData().width = db_.render_settings().width();
+    render.GetData().height = db_.render_settings().height();
+    render.GetData().padding = db_.render_settings().padding();
+    render.GetData().line_width = db_.render_settings().line_width();
+    render.GetData().stop_radius = db_.render_settings().stop_radius();
+    render.GetData().bus_label_font_size = db_.render_settings().bus_label_font_size();
+    int temp = db_.render_settings().bus_label_offset_size();
+    render.GetData().bus_label_offset.first = db_.render_settings().bus_label_offset(0);
+    render.GetData().bus_label_offset.second = db_.render_settings().bus_label_offset(1);
+    render.GetData().stop_label_font_size = db_.render_settings().stop_label_font_size();
+    render.GetData().stop_label_offset.first = db_.render_settings().stop_label_offset(0);
+    render.GetData().stop_label_offset.second = db_.render_settings().stop_label_offset(1);
+    
+    render.GetData().underlayer_color = ParsingColor(db_.render_settings().underlayer_color());
 
 
-    data.underlayer_width = render_settings.underlayer_width();
+    render.GetData().underlayer_width = db_.render_settings().underlayer_width();
 
 
-    for(const Color& i : render_settings.color_palette() )
+    for(const srlz::Color& i : db_.render_settings().color_palette() )
     if(i.has_color_string())
-        data.color_palette.push_back(i.color_string().color());
+        render.GetData().color_palette.push_back(i.color_string().color());
     else{
-        data.color_palette.push_back(ParsingColor(i));
+        render.GetData().color_palette.push_back(ParsingColor(i));
     }
-    //TODO убрать поле data_ и сделать нормальный сеттер и геттер
-    render.data_ = move(data);
+
+    return render;
 }
 
-void RoutingSettingsDeserialization(ctlg::RequestHandler& handler, srlz::RoutingSettings settings){
-    handler.SetVelocity(settings.bus_velocity());
-    handler.SetWaitTime(settings.bus_wait_time());
-}
+// ctlg::RouteSettings serialize::Deserialization::RoutingSettingsDeserialization()
+// {
+//     RouteSettings settings;
+//     settings.velocity = db_.routing_settings().bus_velocity();
+//     settings.wait = db_.routing_settings().bus_wait_time();
 
-bool ctlg::Deserialization(const json::Document& doc, ctlg::RequestHandler& handler){
-    string filename(GetFileName(doc));
-
-    ifstream file(filename, ios::binary);  
-
-    srlz::TransportCatalogue db;
-
-    if(!db.ParseFromIstream(&file))     return false;
-    
-    BaseRequestsDeserialization(handler, db);
-    RenderSettingsDeserialization(*handler.GetRenderMap(), db.render_settings());
-    RoutingSettingsDeserialization(handler, db.routing_settings());
-
-    return true;
-}
+//     return settings;
+// }
 

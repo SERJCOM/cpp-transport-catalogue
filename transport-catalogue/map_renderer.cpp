@@ -7,7 +7,7 @@ svg::Text ctlg::MapRenderer::CreateText(const ctlg::BusRoute* route,  int pos){
             
     text1.SetData(route->name); 
     text1.SetFillColor(data_.color_palette[pos % data_.color_palette.size() ]);
-    text1.SetPosition(projector(route->buses[0]->coord));
+    text1.SetPosition(projector(route->stops[0]->coord));
     text1.SetOffset(svg::Point(data_.bus_label_offset.first, data_.bus_label_offset.second));
     text1.SetFontSize(data_.bus_label_font_size);
     text1.SetFontFamily("Verdana");
@@ -34,13 +34,13 @@ std::vector<const ctlg::BusStop*> ctlg::MapRenderer::CreateLines(const BusRoute 
 
     std::vector<const BusStop*> stops;
             
-    for(const auto stop : route->buses){
+    for(const auto stop : route->stops){
         line.AddPoint(projector(stop->coord));
         stops.push_back(stop);
     }
 
     if(route->type == ctlg::BusRoute::Type::STRAIGHT){
-        for(auto it = route->buses.end() - 2; it >= route->buses.begin(); it--){
+        for(auto it = route->stops.end() - 2; it >= route->stops.begin(); it--){
             
             BusStop temp = *(*it);
             line.AddPoint(projector(temp.coord));
@@ -65,7 +65,7 @@ void ctlg::MapRenderer::DrawMap(std::ostream &out, const std::vector<const ctlg:
     std::vector<geo::Coordinates> coords;
 
     for(const auto& route : routes){ 
-        for(const auto stop : route->buses){
+        for(const auto stop : route->stops){
             coords.push_back(stop->coord);
         }
     }
@@ -96,11 +96,11 @@ void ctlg::MapRenderer::DrawMap(std::ostream &out, const std::vector<const ctlg:
             doc.Add(text1);
             
             if(route->type == ctlg::BusRoute::Type::STRAIGHT){
-                size_t size = route->buses.size() - 1;
-                if(route->buses[size]->coord != route->buses[0]->coord){
+                size_t size = route->stops.size() - 1;
+                if(route->stops[size]->coord != route->stops[0]->coord){
                     svg::Text text2 = text1;
-                    text2.SetPosition(projector(route->buses[size]->coord));
-                    podlozhka.SetPosition(projector(route->buses[size]->coord));
+                    text2.SetPosition(projector(route->stops[size]->coord));
+                    podlozhka.SetPosition(projector(route->stops[size]->coord));
                     doc.Add(std::move(podlozhka));
                     doc.Add(std::move(text2));
                 }

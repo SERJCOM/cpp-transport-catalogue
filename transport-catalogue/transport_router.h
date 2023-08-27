@@ -32,25 +32,48 @@ struct RouteBus{
     float time;
 };
 
+struct RouteSettings{
+    float velocity ;
+    int wait;
+};
+
 
 class TransportRouter{
     public:
 
     using Edge = graph::Edge<float>;
 
-    explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2), velocity(catalogue.GetVelocity() / 60.0), wait(catalogue.GetWaitTime()) {
-
+    explicit TransportRouter(const TransportCatalogue& catalogue, RouteSettings settings):graph_(catalogue.GetStopCount() * 2) {
+        settings_ = settings;
         CreateGraph(catalogue);
     };
 
+    explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2) {
+        CreateGraph(catalogue);
+    };
 
     void InitRouter();
 
     std::optional<std::vector<std::variant<RouteBus, RouteWait>>> FindRoute(std::string_view stop1, std::string_view stop2) const;
 
+    void SetVelocity(float velocity){
+        settings_.velocity= velocity;
+    }
+
+    float GetVelocity() const{
+        return settings_.velocity;
+    }
+
+    void SetWaitTime(int wait){
+        settings_.wait = wait;
+    }
+
+    int GetWaitTime() const{
+        return settings_.wait;
+    }
+
     private:
 
-    
     void CreateGraph(const TransportCatalogue& catalogue);
 
     size_t GetStopWait(std::string_view name);
@@ -58,11 +81,9 @@ class TransportRouter{
 
     static float CalculateTime(float velocity, float length);
 
-
     void FillGraph(const Edge& edge){
         graph_.AddEdge(edge);
     }
-
 
     void CreateRideWaitStops(const BusRoute& route);
 
@@ -77,12 +98,9 @@ class TransportRouter{
     std::unordered_map<graph::VertexId, std::string_view> vertexidwait_stopname_;
     std::unordered_map<graph::VertexId, std::string_view> vertexidride_stopname_;
 
-    float velocity ;
-    int wait;
-
+    RouteSettings settings_;
 
     size_t current_index = 0;
-
 };
 
 template <typename T>
@@ -109,7 +127,7 @@ void TransportRouter::BuildEdge(T begin, T end, std::string_view name, const Tra
                 length += catalogue.GetOneWayDistance((*(it_s))->name, (*it_e)->name);
                 it_s++;
             }
-            edge.weight = CalculateTime(velocity, length);
+            edge.weight = CalculateTime(settings_.velocity, length);
         
             edge.bus = name;
 

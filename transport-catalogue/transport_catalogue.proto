@@ -9,7 +9,8 @@ message StopsDataBase{
 }
 
 message RoadDistances{
-    uint32 stop = 1;
+    uint32 stop_from = 1;
+    uint32 stop_to = 3;
     uint32 length = 2;
 }
 
@@ -22,8 +23,7 @@ message Bus{
 message Stop{
     double latitude = 1;
     double longitude = 2;
-    string name = 3;
-    repeated RoadDistances road_distances = 4;
+    uint32 name = 3;
 }   
 
 message RoutingSettings{
@@ -35,6 +35,7 @@ message TransportCatalogue{
     repeated Bus bus = 1;
     repeated Stop stop = 2;
     StopsDataBase stops_db = 3;
+    repeated RoadDistances distance = 6;
     RenderSetting render_settings = 4;
     RoutingSettings routing_settings = 5;
 

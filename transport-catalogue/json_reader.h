@@ -3,6 +3,7 @@
 #include "transport_catalogue.h"
 #include "request_handler.h"
 #include "map_renderer.h"
+#include <string>
 
 
 namespace ctlg{
@@ -18,9 +19,11 @@ public:
 
     void PrintInformation(std::ostream &output, RequestHandler &request);
 
-    void SetMapRenderer(MapRenderer& render);
+    void ParseMapRenderer(MapRenderer& render);
 
+    // void ParseRoutingSettings(TransportRouter& router);
 
+    std::string GetFileName();
 
 private:
     json::Document doc_;
@@ -28,5 +31,7 @@ private:
 };
 
 void PrintInformation(const json::Document& doc, std::ostream &output, RequestHandler &request);
+
+
 
 }

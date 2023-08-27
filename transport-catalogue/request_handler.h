@@ -19,7 +19,7 @@ public:
 
     RequestHandler() = default;
 
-    RequestHandler(TransportCatalogue* catalogue):catalogue_(catalogue){}
+    explicit RequestHandler(TransportCatalogue& catalogue):catalogue_(&catalogue){}
 
     void SetCatalogue(TransportCatalogue* catalogue){
         catalogue_ = catalogue;
@@ -35,8 +35,8 @@ public:
 
     double GetGeoRouteLength(std::string_view name) const ;
 
-    void SetRenderMap(ctlg::MapRenderer* map){
-        map_ = map;
+    void SetRenderMap(ctlg::MapRenderer& map){
+        map_ = &map;
     }
 
     void SetRouter(TransportRouter& router){

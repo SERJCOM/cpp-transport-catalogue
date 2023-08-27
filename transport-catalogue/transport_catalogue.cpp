@@ -34,13 +34,13 @@ void TransportCatalogue::AddBusRoute(const std::vector<std::string>& route, stri
 
     if(name_busroute_database.count(num) == 0){
         for(const auto& stop : route){
-            res.buses.push_back(CreateBusStop(stop));
+            res.stops.push_back(CreateBusStop(stop));
         }
 
         busroute_database.push_back(std::move(res));
         name_busroute_database[busroute_database.back().name] = &busroute_database.back(); 
 
-        for(const BusStop* stop : name_busroute_database[busroute_database.back().name]->buses){
+        for(const BusStop* stop : name_busroute_database[busroute_database.back().name]->stops){
             busstop_busroute_database[stop->name].insert(busroute_database.back().name);
         }        
     }
@@ -51,16 +51,16 @@ bool TransportCatalogue::BusStopExist(std::string_view stop) const
     return name_busstop_database.count(stop) == 1;
 }
 
-std::vector<BusStop> TransportCatalogue::GetStops(std::string_view num) const
+std::vector<const BusStop*> TransportCatalogue::GetStops(std::string_view num) const
 {
     if(name_busroute_database.count(num) == 0){
-        static std::vector<BusStop> temp;
+        static std::vector<const BusStop*> temp;
         return temp;
     }
 
-    std::vector<BusStop> res;
-    for(const BusStop* i : name_busroute_database.at(num)->buses){
-        res.push_back(*i);
+    std::vector<const BusStop*> res;
+    for(const BusStop* i : name_busroute_database.at(num)->stops){
+        res.push_back(i);
     }
 
     return res;
@@ -94,7 +94,7 @@ size_t TransportCatalogue::GetUniqueStopsForRoute(std::string_view num) const
     if(type == BusRoute::Type::CYCLIC){
         unordered_set<string> pasted;
         
-        for(auto i : route->buses){
+        for(auto i : route->stops){
             if(pasted.count(i->name) == 0){
                 pasted.insert(i->name);
                 uniq++;
@@ -106,7 +106,7 @@ size_t TransportCatalogue::GetUniqueStopsForRoute(std::string_view num) const
     
     unordered_set<std::string> pasted;
 
-    for(auto i : route->buses){
+    for(auto i : route->stops){
         if(pasted.count(i->name) == 0){
             pasted.insert(i->name);
             uniq++;

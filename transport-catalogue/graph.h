@@ -20,8 +20,6 @@ struct Edge {
 
     int span;
 
-    size_t index;
-
     std::string_view bus;
 
     bool operator==(const Edge<Weight>& edge) const {
@@ -44,6 +42,10 @@ public:
     size_t GetEdgeCount() const;
     const Edge<Weight>& GetEdge(EdgeId edge_id) const;
     IncidentEdgesRange GetIncidentEdges(VertexId vertex) const;
+
+    void SetVertexCount(size_t size){
+        incidence_lists_ = std::vector<IncidenceList>(size);
+    }
 
 private:
     std::vector<Edge<Weight>> edges_;

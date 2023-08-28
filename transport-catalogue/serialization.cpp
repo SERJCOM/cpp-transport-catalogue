@@ -44,14 +44,14 @@ bool serialize::Serialization::Save()
 
 Serialization &serialize::Serialization::CatalogueSerialization(const TransportCatalogue &catalogue)
 {
-    std::unordered_map<string, int> name_index; // stop_name --- index
+     // stop_name --- index
     for(auto stop : catalogue.GetAllStops()){
-        if(name_index.count(stop.name) == 0){
-            name_index[stop.name] = name_index.size();
+        if(name_index_.count(stop.name) == 0){
+            name_index_[stop.name] = name_index_.size();
         }
     }
 
-    for(const auto&[name, index] : name_index){
+    for(const auto&[name, index] : name_index_){
         auto stop = catalogue.GetStop(name);
         srlz::Stop _stop;
         _stop.set_name(index);
@@ -65,8 +65,8 @@ Serialization &serialize::Serialization::CatalogueSerialization(const TransportC
         srlz::RoadDistances rdDist;
         string_view stop_from = stops.first->name;
         string_view stop_to = stops.second->name;
-        rdDist.set_stop_from(name_index.at(stop_from.data()));
-        rdDist.set_stop_to(name_index.at(stop_to.data()));
+        rdDist.set_stop_from(name_index_.at(stop_from.data()));
+        rdDist.set_stop_to(name_index_.at(stop_to.data()));
 
         rdDist.set_length(length);
 
@@ -78,13 +78,13 @@ Serialization &serialize::Serialization::CatalogueSerialization(const TransportC
         _bus.set_is_roundtrip((bus->type == ctlg::BusRoute::Type::CYCLIC)); // todo возможно ошибка
         _bus.set_name(bus->name);
         for(const BusStop* stop : bus->stops){
-            _bus.add_stops(name_index.at(stop->name));
+            _bus.add_stops(name_index_.at(stop->name));
         }
         *db_.add_bus() = move(_bus);
     }
 
-    vector<string> index_name(name_index.size());
-    for(const auto& [name, index] : name_index){
+    vector<string> index_name(name_index_.size());
+    for(const auto& [name, index] : name_index_){
         index_name[index] = name;
     }
 
@@ -155,17 +155,90 @@ serialize::Serialization &serialize::Serialization::MapRendererSerialization(con
     *db_.mutable_render_settings() = move(render);
 
     return *this;
-
 }
 
-// Serialization &serialize::Serialization::RoutingSettingsSerialization(const ctlg::TransportRouter &router)
-// {
-//     srlz::RoutingSettings settings;
-//     settings.set_bus_velocity(router.GetVelocity());
-//     settings.set_bus_wait_time(router.GetVelocity());
-//     *db_.mutable_routing_settings() = settings;
-//     return *this;
-// }
+void serialize::Serialization::SerializeGraph(const Graph & graph, srlz::RoutingSettings& settings)
+{
+    srlz::Graph _graph;
+    // парсим ребра
+    using Edge = graph::Edge<float>;
+    for(int i = 0; i < graph.GetEdgeCount(); i++){
+        Edge edge = graph.GetEdge(i);
+        srlz::Edge _edge;
+        _edge.set_from(edge.from);
+        _edge.set_to(edge.to);
+
+        if(edge.bus.size() > 0)
+            _edge.set_bus(edge.bus.data());
+        // _edge.set_index(edge.index);
+        _edge.set_span(edge.span);
+        _edge.set_weight(edge.weight);
+        *_graph.add_edges() = _edge;
+    }
+
+    _graph.set_vertexsize(graph.GetVertexCount());
+
+    *settings.mutable_graph() = move(_graph);
+}
+
+void serialize::Serialization::SerializeRouter(const ctlg::Router &router, srlz::RoutingSettings& settings)
+{
+    srlz::Router _router;
+
+    for(const auto& array : router.GetRoutesInternalData()){
+        srlz::RouteInternalDataArray dataArray;
+        for(const auto& data : array){
+            srlz::RouteInternalData _data;
+            const ctlg::Router::RouteInternalData& info = data.value();
+            _data.set_weight(info.weight);
+            if(info.prev_edge.has_value())
+                _data.mutable_prev_edge()->set_prev_edge(info.prev_edge.value());
+            *dataArray.add_data() = _data;
+        }
+        *_router.add_routes_internal_data() = dataArray;
+    }
+
+    // 
+
+    *settings.mutable_router() = _router;
+}
+
+Serialization &serialize::Serialization::RoutingSettingsSerialization(const ctlg::TransportRouter &router)
+{
+    srlz::RoutingSettings settings;
+    settings.set_bus_velocity(router.GetVelocity());
+    settings.set_bus_wait_time(router.GetVelocity());
+
+    for(auto [name, pair_id] : router.GetStopsVertex()){
+        srlz::StopNameVertexIds stopname;
+        stopname.set_name(name_index_.at(name.data()));
+        stopname.set_vertex1(pair_id.first.value());
+        stopname.set_vertex2(pair_id.second.value());
+        *settings.add_stop_name_vertex_id() = stopname;
+    }
+
+    for(auto [id, name] : router.GetVertexWaitStopsName()){
+        srlz::VertexIdStopName vertexname;
+        vertexname.set_name(name_index_.at(name.data()));
+        vertexname.set_vertex(id);
+        *settings.add_vertexidwait_stopname() = vertexname;
+    }
+
+    for(auto [id, name] : router.GetVertexRideStopsName()){
+        srlz::VertexIdStopName vertexname;
+        vertexname.set_name(name_index_.at(name.data()));
+        vertexname.set_vertex(id);
+        *settings.add_vertexidride_stopname() = vertexname;
+    }
+
+    SerializeGraph(router.GetGraph(), settings);
+    SerializeRouter(router.GetRouter(), settings);
+
+    // srlz::RouteInternalData temp1 = settings.router().routes_internal_data(18).data(14);
+
+    *db_.mutable_routing_settings() = settings;
+    return *this;
+}
 
 void serialize::Serialization::SetSettings(Settings settings)
 {
@@ -183,11 +256,10 @@ ctlg::TransportCatalogue serialize::Deserialization::CatalogueDeserialization()
 {
     TransportCatalogue catalogue;
 
-    vector<string> stopsdb;
-    stopsdb.reserve(db_.stops_db().stops_size());
+    stopsdb_.reserve(db_.stops_db().stops_size());
 
     for(int i = 0; i < db_.stops_db().stops_size(); i++){
-        stopsdb.push_back(db_.stops_db().stops(i));
+        stopsdb_.push_back(db_.stops_db().stops(i));
     }
 
     for(int i = 0; i < db_.bus_size(); i++){
@@ -195,10 +267,6 @@ ctlg::TransportCatalogue serialize::Deserialization::CatalogueDeserialization()
         srlz::Bus prbus = db_.bus(i);
 
         bus.name = prbus.name();
-
-        // if(bus.name == "g"){
-        //     cout << "true" << endl;;
-        // }
 
         if(prbus.is_roundtrip()){
             bus.type = ctlg::BusRoute::Type::CYCLIC;
@@ -210,7 +278,7 @@ ctlg::TransportCatalogue serialize::Deserialization::CatalogueDeserialization()
         vector<string> stops;
         stops.reserve(prbus.stops_size());
         for(int i = 0; i < prbus.stops_size(); i++){
-            stops.push_back(stopsdb.at(prbus.stops(i)));
+            stops.push_back(stopsdb_.at(prbus.stops(i)));
         }
 
         catalogue.AddBusRoute(stops, std::move(bus.name), bus.type);
@@ -220,7 +288,7 @@ ctlg::TransportCatalogue serialize::Deserialization::CatalogueDeserialization()
         srlz::Stop prstop = db_.stop(i);
         ctlg::BusStop stop;
 
-        stop.name = stopsdb[prstop.name()];
+        stop.name = stopsdb_[prstop.name()];
         stop.coord.lat = prstop.latitude();
         stop.coord.lng = prstop.longitude();
         catalogue.AddBusStop(stop);
@@ -228,7 +296,7 @@ ctlg::TransportCatalogue serialize::Deserialization::CatalogueDeserialization()
 
     for(int i = 0; i < db_.distance_size(); i++){
         srlz::RoadDistances distance = db_.distance(i);
-        catalogue.SetDistanceBetweenStops(stopsdb.at(distance.stop_from()), stopsdb.at(distance.stop_to()), distance.length());
+        catalogue.SetDistanceBetweenStops(stopsdb_.at(distance.stop_from()), stopsdb_.at(distance.stop_to()), distance.length());
     }
 
     return catalogue;
@@ -252,7 +320,6 @@ ctlg::MapRenderer serialize::Deserialization::MapRendererDeserialization()
 {
     MapRenderer render;
 
-    
     render.GetData().width = db_.render_settings().width();
     render.GetData().height = db_.render_settings().height();
     render.GetData().padding = db_.render_settings().padding();
@@ -264,13 +331,9 @@ ctlg::MapRenderer serialize::Deserialization::MapRendererDeserialization()
     render.GetData().bus_label_offset.second = db_.render_settings().bus_label_offset(1);
     render.GetData().stop_label_font_size = db_.render_settings().stop_label_font_size();
     render.GetData().stop_label_offset.first = db_.render_settings().stop_label_offset(0);
-    render.GetData().stop_label_offset.second = db_.render_settings().stop_label_offset(1);
-    
+    render.GetData().stop_label_offset.second = db_.render_settings().stop_label_offset(1);    
     render.GetData().underlayer_color = ParsingColor(db_.render_settings().underlayer_color());
-
-
     render.GetData().underlayer_width = db_.render_settings().underlayer_width();
-
 
     for(const srlz::Color& i : db_.render_settings().color_palette() )
     if(i.has_color_string())
@@ -282,12 +345,95 @@ ctlg::MapRenderer serialize::Deserialization::MapRendererDeserialization()
     return render;
 }
 
-// ctlg::RouteSettings serialize::Deserialization::RoutingSettingsDeserialization()
-// {
-//     RouteSettings settings;
-//     settings.velocity = db_.routing_settings().bus_velocity();
-//     settings.wait = db_.routing_settings().bus_wait_time();
 
-//     return settings;
-// }
 
+ctlg::TransportRouter serialize::Deserialization::RoutingSettingsDeserialization(const ctlg::TransportCatalogue& catalogue)
+{
+    srlz::RoutingSettings _settings = db_.routing_settings();
+
+    // srlz::RouteInternalData temp1 = _settings.router().routes_internal_data(18).data(14);
+
+    TransportRouter router;
+
+    for(int i = 0; i <_settings.stop_name_vertex_id_size(); i++){
+        srlz::StopNameVertexIds name_ids = _settings.stop_name_vertex_id(i) ;
+        int name_id = name_ids.name();
+        const ctlg::BusStop* stopptr = catalogue.GetStopsByName().at(stopsdb_.at(name_id));
+        string_view name(stopptr->name);
+        router.stopname_vertexid_[name] = std::pair{name_ids.vertex1(), name_ids.vertex2()}; 
+    }
+
+    for(int i = 0; i < _settings.vertexidride_stopname_size(); i++){
+        srlz::VertexIdStopName ride_name = _settings.vertexidride_stopname(i);
+        int name_id = ride_name.name();
+        const ctlg::BusStop* stopptr = catalogue.GetStopsByName().at(stopsdb_.at(name_id));
+        string_view name(stopptr->name);
+        router.vertexidride_stopname_[ride_name.vertex()] = name;
+    }
+
+    for(int i = 0; i < _settings.vertexidwait_stopname_size(); i++){
+        srlz::VertexIdStopName wait_name = _settings.vertexidwait_stopname(i);
+        int name_id = wait_name.name();
+        const ctlg::BusStop* stopptr = catalogue.GetStopsByName().at(stopsdb_.at(name_id));
+        string_view name(stopptr->name);
+        router.vertexidwait_stopname_[wait_name.vertex()] = name;
+    }
+
+    router.GetGraph() = DeserializeGraph(catalogue);
+    router.InitRouter();
+    router.GetRouter().SetGraph(router.GetGraph());
+    DeserializeRouter(router.GetRouter());
+
+
+    return router;    
+    
+}
+
+ctlg::Graph serialize::Deserialization::DeserializeGraph(const ctlg::TransportCatalogue& catalogue)
+{
+    
+    srlz::Graph graph = db_.routing_settings().graph();
+    ctlg::Graph _graph;
+    _graph.SetVertexCount(graph.vertexsize());
+
+    for(int i = 0; i < graph.edges_size(); i++){
+        srlz::Edge edge = graph.edges(i);
+        ctlg::TransportRouter::Edge _edge;
+        _edge.from = edge.from();
+        _edge.to = edge.to();
+        _edge.span = edge.span();
+        _edge.weight = edge.weight();
+        if(edge.bus().size() > 0)
+            _edge.bus = catalogue.GetRoute(edge.bus())->name;
+        _graph.AddEdge(_edge);
+    }
+
+    return _graph;
+}
+
+void serialize::Deserialization::DeserializeRouter(ctlg::Router& router)
+{
+    ctlg::Router::RoutesInternalData internalData;
+
+    const srlz::Router _router = db_.routing_settings().router();
+
+    srlz::RouteInternalData temp1 = _router.routes_internal_data(18).data(14);
+    for(int i = 0; i < _router.routes_internal_data_size(); i++){
+        const srlz::RouteInternalDataArray& array = _router.routes_internal_data(i);
+        
+        std::vector<std::optional<ctlg::Router::RouteInternalData>> temp;
+        int temp2 = array.data_size();
+        for(int j = 0; j < array.data_size(); j++){
+            const srlz::RouteInternalData& data = array.data(j);
+            ctlg::Router::RouteInternalData _data;
+            if(data.has_prev_edge())
+                _data.prev_edge = data.prev_edge().prev_edge();
+            _data.weight = data.weight();
+            temp.push_back(_data);
+        }
+        internalData.push_back(temp);
+    }
+
+    
+    router.SetRoutesInternalData(move(internalData));
+}

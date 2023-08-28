@@ -21,7 +21,7 @@ public:
 
     void ParseMapRenderer(MapRenderer& render);
 
-    // void ParseRoutingSettings(TransportRouter& router);
+    void ParseRoutingSettings(TransportRouter& router);
 
     std::string GetFileName();
 

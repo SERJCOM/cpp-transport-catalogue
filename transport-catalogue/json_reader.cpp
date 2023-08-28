@@ -282,16 +282,16 @@ void ctlg::JsonReader::ParseMapRenderer(MapRenderer &render)
     
 }
 
-// void ctlg::JsonReader::ParseRoutingSettings(TransportRouter &router)
-// {
-//     auto routing_settings = doc_.GetRoot().AsDict().at("routing_settings").AsDict();
+void ctlg::JsonReader::ParseRoutingSettings(TransportRouter &router)
+{
+    auto routing_settings = doc_.GetRoot().AsDict().at("routing_settings").AsDict();
         
-//     int bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
-//     float bus_velocity = routing_settings.at("bus_velocity").AsInt();
+    int bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
+    float bus_velocity = routing_settings.at("bus_velocity").AsInt();
 
-//     router.SetVelocity(bus_velocity);
-//     router.SetWaitTime(bus_wait_time);
-// }
+    router.SetVelocity(bus_velocity);
+    router.SetWaitTime(bus_wait_time);
+}
 
 void ctlg::PrintInformation(const json::Document &doc, std::ostream &output, RequestHandler &request)
 {

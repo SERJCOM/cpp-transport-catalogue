@@ -11,13 +11,18 @@
 #include <optional>
 #include <variant>
 
+
+namespace serialize{
+class Deserialization;
+class Serialization;
+}
+
 namespace ctlg{
 
 
 using Graph = graph::DirectedWeightedGraph<float>;
 using Router = graph::Router<float>;
 using VertexOpt = std::optional<graph::VertexId>;
-
 
 
 
@@ -35,44 +40,75 @@ struct RouteBus{
 struct RouteSettings{
     float velocity ;
     int wait;
+
+    std::unordered_map<std::string_view, std::pair<graph::VertexId, graph::VertexId>> stopname_vertexid;  // wait, ride
+    std::unordered_map<graph::VertexId, std::string_view> vertexidwait_stopname;
+    std::unordered_map<graph::VertexId, std::string_view> vertexidride_stopname;
 };
 
 
+
 class TransportRouter{
+
     public:
 
     using Edge = graph::Edge<float>;
-
-    explicit TransportRouter(const TransportCatalogue& catalogue, RouteSettings settings):graph_(catalogue.GetStopCount() * 2) {
-        settings_ = settings;
-        CreateGraph(catalogue);
-    };
 
     explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2) {
         CreateGraph(catalogue);
     };
 
+    explicit TransportRouter() = default;
+
+    void InitGraph(const TransportCatalogue& catalogue){
+        graph_.SetVertexCount(catalogue.GetStopCount() * 2);
+        CreateGraph(catalogue);
+    }
+
+    void CreateRouter(){
+        router_ = std::make_shared<Router>(std::ref(graph_));
+    }
+
     void InitRouter();
+
 
     std::optional<std::vector<std::variant<RouteBus, RouteWait>>> FindRoute(std::string_view stop1, std::string_view stop2) const;
 
-    void SetVelocity(float velocity){
-        settings_.velocity= velocity;
-    }
+    void SetVelocity(float velocity);
 
-    float GetVelocity() const{
-        return settings_.velocity;
-    }
+    float GetVelocity() const;
 
-    void SetWaitTime(int wait){
-        settings_.wait = wait;
-    }
+    void SetWaitTime(int wait);
+
+    const Graph& GetGraph() const;
+
+    Graph& GetGraph();    
+
+    const Router& GetRouter() const;
+
+    Router& GetRouter();
 
     int GetWaitTime() const{
         return settings_.wait;
     }
 
+    const std::unordered_map<std::string_view, std::pair<VertexOpt, VertexOpt>>& GetStopsVertex() const {
+        return stopname_vertexid_;
+    }
+
+    const std::unordered_map<graph::VertexId, std::string_view>& GetVertexWaitStopsName() const {
+        return vertexidwait_stopname_;
+    }
+
+    const std::unordered_map<graph::VertexId, std::string_view>& GetVertexRideStopsName() const {
+        return vertexidride_stopname_;
+    }
+
+
     private:
+
+    friend class serialize::Deserialization;
+    friend class serialize::Serialization;
 
     void CreateGraph(const TransportCatalogue& catalogue);
 

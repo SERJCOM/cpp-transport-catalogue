@@ -78,6 +78,10 @@ public:
         return distance_between_stops;
     }
 
+    const std::unordered_map<std::string_view, const BusStop*>&  GetStopsByName() const {
+        return name_busstop_database;
+    }
+
 private:
 
     // Нужно для резервирования места для остановки в БД
@@ -89,7 +93,7 @@ private:
     std::unordered_map<std::string_view, const BusStop*> name_busstop_database;
     std::unordered_map<std::string_view, const BusRoute*> name_busroute_database;
     std::unordered_map<std::string_view, std::unordered_set<std::string_view>> busstop_busroute_database; // остановка - ключ, маршрут - значение
-    std::unordered_map<std::pair<const BusStop*, const BusStop*>, int, ctlg::Hash::BusA_BusB> distance_between_stops;
+    distance_map distance_between_stops;
 
 
     float bus_velocity_;

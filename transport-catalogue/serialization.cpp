@@ -181,6 +181,7 @@ void serialize::Serialization::SerializeGraph(const Graph & graph, srlz::Routing
 }
 
 
+
 void serialize::Serialization::SerializeRouter(const ctlg::Router &router, srlz::RoutingSettings& settings)
 {
     srlz::Router _router;

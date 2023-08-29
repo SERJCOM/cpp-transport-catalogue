@@ -23,7 +23,7 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
 {
     for(auto name : catalogue.GetRouteNames()){
         
-        const BusRoute* route = catalogue.GetRoute(name);
+        const BusRoute* route = catalogue.GetRouteByName(name);
         CreateRideWaitStops(*route);
     
         for(auto it = route->stops.begin(); it != route->stops.end(); it++){
@@ -45,6 +45,18 @@ void ctlg::TransportRouter::CreateGraph(const TransportCatalogue &catalogue)
     }   
 }
 
+
+void ctlg::TransportRouter::InitGraph(const TransportCatalogue &catalogue)
+{
+    graph_.SetVertexCount(catalogue.GetStopCount() * 2);
+    CreateGraph(catalogue);
+}
+
+void ctlg::TransportRouter::CreateRouter()
+{
+    router_ = std::make_shared<Router>(std::ref(graph_));
+}
+
 void ctlg::TransportRouter::InitRouter()
 {
     if(!router_)
@@ -52,6 +64,11 @@ void ctlg::TransportRouter::InitRouter()
     router_->InitialRouter();
 }
 
+void ctlg::TransportRouter::Init(const TransportCatalogue& catalogue)
+{
+    InitGraph(catalogue);
+    InitRouter();
+}
 
 std::optional<std::vector<std::variant<RouteBus, RouteWait>>> ctlg::TransportRouter::FindRoute(std::string_view stop1, std::string_view stop2) const
 {
@@ -140,9 +157,34 @@ ctlg::Router &ctlg::TransportRouter::GetRouter()
     return *router_;
 }
 
+int ctlg::TransportRouter::GetWaitTime() const
+{
+    return settings_.wait;
+}
+
+const std::unordered_map<std::string_view, std::pair<VertexOpt, VertexOpt>> &ctlg::TransportRouter::GetStopsVertex() const
+{
+    return stopname_vertexid_;
+}
+
+const std::unordered_map<graph::VertexId, std::string_view> &ctlg::TransportRouter::GetVertexWaitStopsName() const
+{
+    return vertexidwait_stopname_;
+}
+
+const std::unordered_map<graph::VertexId, std::string_view> &ctlg::TransportRouter::GetVertexRideStopsName() const
+{
+    return vertexidride_stopname_;
+}
+
 inline float ctlg::TransportRouter::CalculateTime(float velocity, float length)
 {
     return (length / 1000) / velocity * 60;   
+}
+
+void ctlg::TransportRouter::FillGraph(const Edge &edge)
+{
+    graph_.AddEdge(edge);
 }
 
 void ctlg::TransportRouter::CreateRideWaitStops(const BusRoute &route)

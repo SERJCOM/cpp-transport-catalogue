@@ -54,23 +54,19 @@ class TransportRouter{
 
     using Edge = graph::Edge<float>;
 
-    explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2) {
+    explicit TransportRouter(const TransportCatalogue& catalogue):graph_(catalogue.GetStopCount() * 2){
         CreateGraph(catalogue);
-    };
+    }
 
     explicit TransportRouter() = default;
 
-    void InitGraph(const TransportCatalogue& catalogue){
-        graph_.SetVertexCount(catalogue.GetStopCount() * 2);
-        CreateGraph(catalogue);
-    }
+    void InitGraph(const TransportCatalogue& catalogue);
 
-    void CreateRouter(){
-        router_ = std::make_shared<Router>(std::ref(graph_));
-    }
+    void CreateRouter();
 
     void InitRouter();
 
+    void Init(const TransportCatalogue& catalogue);
 
     std::optional<std::vector<std::variant<RouteBus, RouteWait>>> FindRoute(std::string_view stop1, std::string_view stop2) const;
 
@@ -88,24 +84,16 @@ class TransportRouter{
 
     Router& GetRouter();
 
-    int GetWaitTime() const{
-        return settings_.wait;
-    }
+    int GetWaitTime() const;
 
-    const std::unordered_map<std::string_view, std::pair<VertexOpt, VertexOpt>>& GetStopsVertex() const {
-        return stopname_vertexid_;
-    }
+    const std::unordered_map<std::string_view, std::pair<VertexOpt, VertexOpt>>& GetStopsVertex() const ;
 
-    const std::unordered_map<graph::VertexId, std::string_view>& GetVertexWaitStopsName() const {
-        return vertexidwait_stopname_;
-    }
+    const std::unordered_map<graph::VertexId, std::string_view>& GetVertexWaitStopsName() const ;
 
-    const std::unordered_map<graph::VertexId, std::string_view>& GetVertexRideStopsName() const {
-        return vertexidride_stopname_;
-    }
+    const std::unordered_map<graph::VertexId, std::string_view>& GetVertexRideStopsName() const ;
 
 
-    private:
+private:
 
     friend class serialize::Deserialization;
     friend class serialize::Serialization;
@@ -117,9 +105,7 @@ class TransportRouter{
 
     static float CalculateTime(float velocity, float length);
 
-    void FillGraph(const Edge& edge){
-        graph_.AddEdge(edge);
-    }
+    void FillGraph(const Edge& edge);
 
     void CreateRideWaitStops(const BusRoute& route);
 

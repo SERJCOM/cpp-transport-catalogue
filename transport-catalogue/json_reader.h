@@ -33,5 +33,4 @@ private:
 void PrintInformation(const json::Document& doc, std::ostream &output, RequestHandler &request);
 
 
-
 }

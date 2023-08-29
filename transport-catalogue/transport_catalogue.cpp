@@ -67,7 +67,7 @@ std::vector<const BusStop*> TransportCatalogue::GetStops(std::string_view num) c
 }
 
 
-const BusStop* TransportCatalogue::GetStop(std::string_view name) const
+const BusStop* TransportCatalogue::GetStopByName(std::string_view name) const
 {
     if(name_busstop_database.count(name) == 0){
         return nullptr;
@@ -75,7 +75,7 @@ const BusStop* TransportCatalogue::GetStop(std::string_view name) const
     return name_busstop_database.at(name);
 }
 
-const BusRoute* TransportCatalogue::GetRoute(std::string_view num) const
+const BusRoute* TransportCatalogue::GetRouteByName(std::string_view num) const
 {
     if(name_busroute_database.count(num) == 0){
         return nullptr;
@@ -152,14 +152,19 @@ void TransportCatalogue::SetDistanceBetweenStops(std::string_view stop1, std::st
 
 int TransportCatalogue::GetDistanceBetweenStops(std::string_view stop1, std::string_view stop2) const
 {
-    if(distance_between_stops.find({GetStop(stop1), GetStop(stop2)}) != distance_between_stops.end()){
-        return distance_between_stops.at({GetStop(stop1), GetStop(stop2)});
+    if(distance_between_stops.find({GetStopByName(stop1), GetStopByName(stop2)}) != distance_between_stops.end()){
+        return distance_between_stops.at({GetStopByName(stop1), GetStopByName(stop2)});
     }
-    if(distance_between_stops.find({GetStop(stop2), GetStop(stop1)}) != distance_between_stops.end()){
-        return distance_between_stops.at({GetStop(stop2), GetStop(stop1)});
+    if(distance_between_stops.find({GetStopByName(stop2), GetStopByName(stop1)}) != distance_between_stops.end()){
+        return distance_between_stops.at({GetStopByName(stop2), GetStopByName(stop1)});
     }
 
     return 0;
+}
+
+int ctlg::TransportCatalogue::GetOneWayDistance(std::string_view stop1, std::string_view stop2) const
+{
+    return distance_between_stops.at({GetStopByName(stop1), GetStopByName(stop2)});
 }
 
 std::vector<std::string_view> ctlg::TransportCatalogue::GetRouteNames() const
@@ -178,6 +183,26 @@ std::vector<const BusRoute*> ctlg::TransportCatalogue::GetRouteDataBase() const
         res.push_back(&route);
     }
     return res;
+}
+
+int ctlg::TransportCatalogue::GetStopCount() const
+{
+    return stop_count_;
+}
+
+int ctlg::TransportCatalogue::GetBusCount() const
+{
+    return busroute_database.size();
+}
+
+const std::deque<BusStop> &ctlg::TransportCatalogue::GetAllStops() const
+{
+    return busstop_database;
+}
+
+const ctlg::TransportCatalogue::distance_map &ctlg::TransportCatalogue::GetDistanceBetweenStops() const
+{
+    return distance_between_stops;
 }
 
 const BusStop *TransportCatalogue::CreateBusStop(std::string_view name)

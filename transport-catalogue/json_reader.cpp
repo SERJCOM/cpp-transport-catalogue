@@ -107,7 +107,7 @@ public:
         builder.StartDict();
         
 
-        if(request.GetCatalogue()->GetRoute(name) == nullptr){
+        if(request.GetCatalogue()->GetRouteByName(name) == nullptr){
             builder.Key("error_message").Value("not found");
         }else{
             

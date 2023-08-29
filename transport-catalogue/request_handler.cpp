@@ -19,7 +19,7 @@ int ctlg::RequestHandler::GetRouteLength(std::string_view name) const
         length += catalogue_->GetOneWayDistance((*it)->name, (*(it + 1))->name);
     }
 
-    if(catalogue_->GetRoute(name)->type == BusRoute::Type::STRAIGHT){
+    if(catalogue_->GetRouteByName(name)->type == BusRoute::Type::STRAIGHT){
         for(auto it = stops.end() - 1; it != stops.begin(); it--){
             length += catalogue_->GetOneWayDistance((*it)->name, (*(it - 1))->name);
         }
@@ -38,7 +38,7 @@ double ctlg::RequestHandler::GetGeoRouteLength(std::string_view name) const
         length += geo::ComputeDistance((*it)->coord, (*(it + 1))->coord);
     }
 
-    if(catalogue_->GetRoute(name)->type == BusRoute::Type::STRAIGHT){
+    if(catalogue_->GetRouteByName(name)->type == BusRoute::Type::STRAIGHT){
         length *= 2;
     }
 

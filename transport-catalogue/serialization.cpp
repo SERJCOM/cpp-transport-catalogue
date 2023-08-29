@@ -52,7 +52,7 @@ Serialization &serialize::Serialization::CatalogueSerialization(const TransportC
     }
 
     for(const auto&[name, index] : name_index_){
-        auto stop = catalogue.GetStop(name);
+        auto stop = catalogue.GetStopByName(name);
         srlz::Stop _stop;
         _stop.set_name(index);
         _stop.set_latitude(stop->coord.lat);
@@ -170,7 +170,6 @@ void serialize::Serialization::SerializeGraph(const Graph & graph, srlz::Routing
 
         if(edge.bus.size() > 0)
             _edge.set_bus(edge.bus.data());
-        // _edge.set_index(edge.index);
         _edge.set_span(edge.span);
         _edge.set_weight(edge.weight);
         *_graph.add_edges() = _edge;
@@ -197,8 +196,6 @@ void serialize::Serialization::SerializeRouter(const ctlg::Router &router, srlz:
         }
         *_router.add_routes_internal_data() = dataArray;
     }
-
-    // 
 
     *settings.mutable_router() = _router;
 }
@@ -234,8 +231,6 @@ Serialization &serialize::Serialization::RoutingSettingsSerialization(const ctlg
     SerializeGraph(router.GetGraph(), settings);
     SerializeRouter(router.GetRouter(), settings);
 
-    // srlz::RouteInternalData temp1 = settings.router().routes_internal_data(18).data(14);
-
     *db_.mutable_routing_settings() = settings;
     return *this;
 }
@@ -248,7 +243,6 @@ void serialize::Serialization::SetSettings(Settings settings)
 serialize::Deserialization::Deserialization(Settings settings)
 {
     ifstream file(settings.GetFileName().data(), ios::binary);
-
     db_.ParseFromIstream(&file);
 }
 
@@ -346,19 +340,15 @@ ctlg::MapRenderer serialize::Deserialization::MapRendererDeserialization()
 }
 
 
-
 ctlg::TransportRouter serialize::Deserialization::RoutingSettingsDeserialization(const ctlg::TransportCatalogue& catalogue)
 {
     srlz::RoutingSettings _settings = db_.routing_settings();
-
-    // srlz::RouteInternalData temp1 = _settings.router().routes_internal_data(18).data(14);
-
     TransportRouter router;
 
     for(int i = 0; i <_settings.stop_name_vertex_id_size(); i++){
         srlz::StopNameVertexIds name_ids = _settings.stop_name_vertex_id(i) ;
         int name_id = name_ids.name();
-        const ctlg::BusStop* stopptr = catalogue.GetStopsByName().at(stopsdb_.at(name_id));
+        const ctlg::BusStop* stopptr = catalogue.GetStopByName(stopsdb_.at(name_id));
         string_view name(stopptr->name);
         router.stopname_vertexid_[name] = std::pair{name_ids.vertex1(), name_ids.vertex2()}; 
     }
@@ -366,7 +356,7 @@ ctlg::TransportRouter serialize::Deserialization::RoutingSettingsDeserialization
     for(int i = 0; i < _settings.vertexidride_stopname_size(); i++){
         srlz::VertexIdStopName ride_name = _settings.vertexidride_stopname(i);
         int name_id = ride_name.name();
-        const ctlg::BusStop* stopptr = catalogue.GetStopsByName().at(stopsdb_.at(name_id));
+        const ctlg::BusStop* stopptr = catalogue.GetStopByName(stopsdb_.at(name_id));
         string_view name(stopptr->name);
         router.vertexidride_stopname_[ride_name.vertex()] = name;
     }
@@ -374,7 +364,7 @@ ctlg::TransportRouter serialize::Deserialization::RoutingSettingsDeserialization
     for(int i = 0; i < _settings.vertexidwait_stopname_size(); i++){
         srlz::VertexIdStopName wait_name = _settings.vertexidwait_stopname(i);
         int name_id = wait_name.name();
-        const ctlg::BusStop* stopptr = catalogue.GetStopsByName().at(stopsdb_.at(name_id));
+        const ctlg::BusStop* stopptr = catalogue.GetStopByName(stopsdb_.at(name_id));
         string_view name(stopptr->name);
         router.vertexidwait_stopname_[wait_name.vertex()] = name;
     }
@@ -384,9 +374,7 @@ ctlg::TransportRouter serialize::Deserialization::RoutingSettingsDeserialization
     router.GetRouter().SetGraph(router.GetGraph());
     DeserializeRouter(router.GetRouter());
 
-
-    return router;    
-    
+    return router;        
 }
 
 ctlg::Graph serialize::Deserialization::DeserializeGraph(const ctlg::TransportCatalogue& catalogue)
@@ -404,7 +392,7 @@ ctlg::Graph serialize::Deserialization::DeserializeGraph(const ctlg::TransportCa
         _edge.span = edge.span();
         _edge.weight = edge.weight();
         if(edge.bus().size() > 0)
-            _edge.bus = catalogue.GetRoute(edge.bus())->name;
+            _edge.bus = catalogue.GetRouteByName(edge.bus())->name;
         _graph.AddEdge(_edge);
     }
 
@@ -414,15 +402,11 @@ ctlg::Graph serialize::Deserialization::DeserializeGraph(const ctlg::TransportCa
 void serialize::Deserialization::DeserializeRouter(ctlg::Router& router)
 {
     ctlg::Router::RoutesInternalData internalData;
-
     const srlz::Router _router = db_.routing_settings().router();
 
-    srlz::RouteInternalData temp1 = _router.routes_internal_data(18).data(14);
     for(int i = 0; i < _router.routes_internal_data_size(); i++){
-        const srlz::RouteInternalDataArray& array = _router.routes_internal_data(i);
-        
+        const srlz::RouteInternalDataArray& array = _router.routes_internal_data(i);        
         std::vector<std::optional<ctlg::Router::RouteInternalData>> temp;
-        int temp2 = array.data_size();
         for(int j = 0; j < array.data_size(); j++){
             const srlz::RouteInternalData& data = array.data(j);
             ctlg::Router::RouteInternalData _data;
@@ -434,6 +418,5 @@ void serialize::Deserialization::DeserializeRouter(ctlg::Router& router)
         internalData.push_back(temp);
     }
 
-    
     router.SetRoutesInternalData(move(internalData));
 }

@@ -68,15 +68,7 @@ public:
 
     TransportCatalogue* GetCatalogue() const ;
 
-    void SetVelocity(float velocity){
-        assert(catalogue_);
-        catalogue_->SetBusVelocity(velocity);
-    }
 
-    void SetWaitTime(int time){
-        assert(catalogue_);
-        catalogue_->SetWaitTime(time);
-    }
     
 private:
 

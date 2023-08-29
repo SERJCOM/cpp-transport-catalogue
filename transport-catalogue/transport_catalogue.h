@@ -22,9 +22,9 @@ public:
 
     std::vector<const BusStop*> GetStops(std::string_view num) const ;
 
-    const BusStop* GetStop(std::string_view name) const ;
+    const BusStop* GetStopByName(std::string_view name) const ;
 
-    const BusRoute* GetRoute(std::string_view num) const ;
+    const BusRoute* GetRouteByName(std::string_view num) const ;
 
     size_t GetUniqueStopsForRoute(std::string_view num) const ;
 
@@ -36,58 +36,25 @@ public:
 
     int GetDistanceBetweenStops(std::string_view stop1, std::string_view stop2) const ; 
 
-    int GetOneWayDistance(std::string_view stop1, std::string_view stop2) const {
-        return distance_between_stops.at({GetStop(stop1), GetStop(stop2)});
-    }
-
+    int GetOneWayDistance(std::string_view stop1, std::string_view stop2) const ;
 
     std::vector<std::string_view> GetRouteNames() const;
 
     std::vector<const BusRoute*> GetRouteDataBase() const;
 
-    void SetBusVelocity(float velocity){
-        bus_velocity_ = velocity;
-    }
+    int GetStopCount() const;
 
-    float GetVelocity() const {
-        return bus_velocity_;
-    }
+    int GetBusCount() const ;
 
-    void SetWaitTime(int time){
-        bus_wait_time_ = time;
-    }
-
-    int GetWaitTime() const {
-        return bus_wait_time_;
-    }
-
-    int GetStopCount() const{
-        return stop_count_;
-    }
-
-    int GetBusCount() const {
-        return busroute_database.size();
-    }
-
-    const std::deque<BusStop>& GetAllStops() const {
-        return busstop_database;
-    }
+    const std::deque<BusStop>& GetAllStops() const;
 
     using distance_map = std::unordered_map<std::pair<const BusStop*, const BusStop*>, int, ctlg::Hash::BusA_BusB>;
-    const distance_map& GetDistanceBetweenStops() const {
-        return distance_between_stops;
-    }
-
-    const std::unordered_map<std::string_view, const BusStop*>&  GetStopsByName() const {
-        return name_busstop_database;
-    }
+    const distance_map& GetDistanceBetweenStops() const ;
 
 private:
-
     // Нужно для резервирования места для остановки в БД
     const BusStop* CreateBusStop(std::string_view name); 
 
-    
     std::deque<BusStop> busstop_database;
     std::deque<BusRoute> busroute_database;
     std::unordered_map<std::string_view, const BusStop*> name_busstop_database;
@@ -95,12 +62,8 @@ private:
     std::unordered_map<std::string_view, std::unordered_set<std::string_view>> busstop_busroute_database; // остановка - ключ, маршрут - значение
     distance_map distance_between_stops;
 
-
-    float bus_velocity_;
-    int bus_wait_time_;
     int stop_count_ = 0;
     int bus_count_ = 0;
-
 };
 
 }

@@ -3,6 +3,7 @@ syntax = "proto3";
 package srlz;
 
 import "map_renderer.proto";
+import "transport_router.proto";
 
 message StopsDataBase{
     repeated string stops = 1;
@@ -27,63 +28,6 @@ message Stop{
     uint32 name = 3;
 }   
 
-message StopNameVertexIds{
-    uint32 name = 1;
-    uint32 vertex1 = 2;
-    uint32 vertex2 = 3;
-}
-
-message VertexIdStopName{
-    uint32 vertex = 1;
-    uint32 name = 2;
-}
-
-message IncidenceList{
-    repeated uint32 edge_id = 1;
-}
-
-message Edge{
-    uint32 from = 1;
-    uint32 to = 2;
-    float weight = 3;
-    uint32 span = 4;
-    // uint32 index = 5;
-    string bus = 6;
-}
-
-message Graph{
-    repeated Edge edges = 1;
-    uint32 vertexSize = 2;
-    // repeated IncidenceList incidence_lists = 2;
-}
-
-message PrevEdge{
-    uint32 prev_edge = 1;
-}
-
-message RouteInternalData{
-    float weight = 1;
-    PrevEdge prev_edge = 2;
-    
-}
-
-message RouteInternalDataArray{
-    repeated RouteInternalData data = 1;
-}
-
-message Router{
-    repeated RouteInternalDataArray routes_internal_data = 1;
-}
-
-message RoutingSettings{
-    float bus_wait_time = 1;
-    float bus_velocity = 2;
-    repeated StopNameVertexIds stop_name_vertex_id = 3;
-    repeated VertexIdStopName vertexidwait_stopname = 4;
-    repeated VertexIdStopName vertexidride_stopname = 5;
-    Graph graph = 6;
-    Router router = 7;
-}
 
 message TransportCatalogue{
     repeated Bus bus = 1;

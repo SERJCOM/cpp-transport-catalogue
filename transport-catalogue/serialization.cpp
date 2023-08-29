@@ -194,10 +194,10 @@ void serialize::Serialization::SerializeRouter(const ctlg::Router &router, srlz:
                 _data.mutable_prev_edge()->set_prev_edge(info.prev_edge.value());
             *dataArray.add_data() = _data;
         }
-        *_router.add_routes_internal_data() = dataArray;
+        *_router.add_routes_internal_data() = move(dataArray);
     }
 
-    *settings.mutable_router() = _router;
+    *settings.mutable_router() = move(_router);
 }
 
 Serialization &serialize::Serialization::RoutingSettingsSerialization(const ctlg::TransportRouter &router)
@@ -415,7 +415,7 @@ void serialize::Deserialization::DeserializeRouter(ctlg::Router& router)
             _data.weight = data.weight();
             temp.push_back(_data);
         }
-        internalData.push_back(temp);
+        internalData.push_back(move(temp));
     }
 
     router.SetRoutesInternalData(move(internalData));

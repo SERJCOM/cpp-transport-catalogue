@@ -180,6 +180,7 @@ void serialize::Serialization::SerializeGraph(const Graph & graph, srlz::Routing
     *settings.mutable_graph() = move(_graph);
 }
 
+
 void serialize::Serialization::SerializeRouter(const ctlg::Router &router, srlz::RoutingSettings& settings)
 {
     srlz::Router _router;

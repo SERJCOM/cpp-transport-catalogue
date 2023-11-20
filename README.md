@@ -1,8 +1,8 @@
 # Transport Catalogue 
 ## City bus route directory
-![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white)
-https://img.shields.io/github/stars/{SERJCOM}/{cpp-transport-catalogue}.svg
 
+![GitHub language count](https://img.shields.io/github/languages/count/SERJCOM/cpp-transport-catalogue) 
+![GitHub top language](https://img.shields.io/github/languages/top/SERJCOM/cpp-transport-catalogue?color=yellow) 
 
 ## Features:
 + allows you to build transportation and walking routes for cities
